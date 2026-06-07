@@ -1,0 +1,45 @@
+# =====================================================
+# AEGIS-ORBIT — .gitignore
+# =====================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Android Studio
+.idea/
+*.iml
+local.properties
+android-app/.gradle/
+android-app/build/
+android-app/app/build/
+android-app/captures/
+android-app/.externalNativeBuild/
+android-app/.cxx/
+*.apk
+*.aab
+*.ap_
+
+# Keystore files (NEVER commit)
+*.jks
+*.keystore
+
+# Gradle
+gradle-wrapper.jar
+.gradle/
+
+# Node / npm (if applicable)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Editor configs
+*.swp
+*.swo
+*~
+.vscode/settings.json

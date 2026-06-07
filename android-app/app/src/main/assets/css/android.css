@@ -1,0 +1,509 @@
+/* =============================================================
+   AEGIS-ORBIT — ANDROID MOBILE OVERRIDE CSS
+   Este arquivo transforma o layout desktop em layout mobile.
+   Carregado APÓS style.css para sobrescrever com alta especificidade.
+   ============================================================= */
+
+/* ---- Body & Root ---- */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+    touch-action: pan-y;
+}
+
+body {
+    display: block !important;
+    background-size: 20px 20px;
+}
+
+/* ============================================================
+   SIDEBAR → BOTTOM NAV (Mobile conversion)
+   ============================================================ */
+.sidebar {
+    width: 100% !important;
+    height: 60px !important;
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 !important;
+    border-right: none !important;
+    border-top: 1px solid var(--glass-border) !important;
+    z-index: 1000 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+    background: rgba(6, 9, 19, 0.97) !important;
+    backdrop-filter: blur(12px) !important;
+}
+
+.sidebar-top {
+    display: contents !important;
+}
+
+.logo-container {
+    display: none !important;
+}
+
+.sidebar-footer {
+    display: none !important;
+}
+
+.nav-menu {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0 !important;
+    flex-grow: 1 !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+}
+
+.nav-item {
+    flex: 1 !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.nav-link {
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 6px 4px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 0.45rem !important;
+    letter-spacing: 0 !important;
+    width: 100% !important;
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    height: 54px !important;
+}
+
+.nav-link span {
+    font-size: 0.42rem !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 52px !important;
+}
+
+.nav-link i {
+    font-size: 1.1rem !important;
+}
+
+.nav-link:hover {
+    padding-left: 4px !important;
+}
+
+.nav-link.active {
+    color: var(--color-cyan) !important;
+    background: rgba(0, 229, 255, 0.08) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.nav-link.active i {
+    color: var(--color-cyan) !important;
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.6) !important;
+}
+
+/* ============================================================
+   MAIN CONTENT — Full width, pad for bottom nav
+   ============================================================ */
+.main-content {
+    margin-left: 0 !important;
+    padding: 12px 12px 72px 12px !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    gap: 14px !important;
+}
+
+/* ============================================================
+   HEADER — Stack vertically on mobile
+   ============================================================ */
+.page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding-bottom: 12px !important;
+}
+
+.page-header > div:last-child {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+.header-title h1 {
+    font-size: 1.35rem !important;
+    line-height: 1.2 !important;
+}
+
+.header-title p {
+    font-size: 0.78rem !important;
+}
+
+.header-badge {
+    font-size: 0.65rem !important;
+    padding: 6px 10px !important;
+}
+
+/* ============================================================
+   WIDGETS ROW — 2 columns on mobile
+   ============================================================ */
+.widgets-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+}
+
+.widget-card {
+    padding: 12px !important;
+    gap: 10px !important;
+}
+
+.widget-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+}
+
+.widget-value {
+    font-size: 1rem !important;
+}
+
+/* ============================================================
+   DASHBOARD GRID — Single column
+   ============================================================ */
+.dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+}
+
+.ops-center {
+    height: 320px !important;
+}
+
+.ops-controls {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+}
+
+.btn-tab {
+    font-size: 0.62rem !important;
+    padding: 5px 8px !important;
+    letter-spacing: 0 !important;
+}
+
+/* ============================================================
+   TELEMETRY BOXES
+   ============================================================ */
+.telemetry-side {
+    gap: 12px !important;
+}
+
+.telemetry-box {
+    max-height: none !important;
+}
+
+.hud-panel {
+    padding: 14px 12px !important;
+}
+
+.box-title {
+    font-size: 0.72rem !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+}
+
+/* Telemetry mini-grid 2 cols */
+.dashboard-grid .telemetry-side > .hud-panel > div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+}
+
+/* ============================================================
+   CONSOLE LOGS — Taller on mobile
+   ============================================================ */
+.console-logs {
+    height: 120px !important;
+    font-size: 0.65rem !important;
+}
+
+/* ============================================================
+   SECTION: PURPOSE (Missão Aegis)
+   ============================================================ */
+.purpose-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+}
+
+.purpose-text {
+    max-width: 100% !important;
+}
+
+.infographic-steps {
+    gap: 10px !important;
+}
+
+.info-step-card {
+    padding: 12px !important;
+}
+
+.infographic-viz-box {
+    min-height: 200px !important;
+}
+
+/* ============================================================
+   SECTION: SIMULATOR (Android Simulator)
+   ============================================================ */
+.simulator-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+}
+
+.simulator-info {
+    width: 100% !important;
+}
+
+/* Phone chassis — scaled to fit */
+.phone-skeleton {
+    width: 100% !important;
+    max-width: 320px !important;
+    height: auto !important;
+    min-height: 560px !important;
+    margin: 0 auto !important;
+    border-radius: 28px !important;
+}
+
+/* ============================================================
+   SECTION: OBSERVATORY
+   ============================================================ */
+.obs-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+}
+
+.apod-panel,
+.neo-panel {
+    width: 100% !important;
+}
+
+.iss-data-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+}
+
+/* ============================================================
+   SECTION: PRESENTATION
+   ============================================================ */
+.presentation-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+}
+
+/* ============================================================
+   SDG GRID
+   ============================================================ */
+.sdg-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+}
+
+/* ============================================================
+   PREDICTIVE MODAL — Full screen on mobile
+   ============================================================ */
+.predictive-modal {
+    width: 96% !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+}
+
+.modal-columns-grid {
+    grid-template-columns: 1fr !important;
+}
+
+.modal-columns-grid > div {
+    border-right: none !important;
+    padding-right: 0 !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 12px !important;
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.toast-notification {
+    bottom: 72px !important;
+    right: 12px !important;
+    left: 12px !important;
+    max-width: none !important;
+    font-size: 0.8rem !important;
+}
+
+/* ============================================================
+   VOICE COMMAND MODAL
+   ============================================================ */
+.voice-command-modal {
+    width: 92% !important;
+}
+
+/* ============================================================
+   MAP CONTROLS
+   ============================================================ */
+.map-hud-overlay {
+    font-size: 0.62rem !important;
+    padding: 6px 8px !important;
+}
+
+#btn-toggle-iss span {
+    display: none !important;
+}
+
+#btn-toggle-iss {
+    padding: 8px 10px !important;
+}
+
+/* ============================================================
+   TOUCH TARGETS — Minimum 44x44px for all buttons
+   ============================================================ */
+button, .btn-tab, .nav-link, a {
+    min-height: 36px !important;
+}
+
+.phone-nav-btn {
+    min-height: 40px !important;
+    font-size: 0.52rem !important;
+}
+
+.phone-btn {
+    min-height: 36px !important;
+}
+
+/* ============================================================
+   OVERFLOW FIX for long tables and grids
+   ============================================================ */
+table {
+    width: 100% !important;
+    font-size: 0.72rem !important;
+}
+
+.sdg-card {
+    padding: 10px !important;
+}
+
+/* ============================================================
+   API DIAG GRID
+   ============================================================ */
+.api-diag-grid > div {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+}
+
+/* ============================================================
+   NOAA WEATHER STATS
+   ============================================================ */
+.weather-stat span:first-child {
+    font-size: 0.52rem !important;
+}
+
+.weather-stat span:last-child {
+    font-size: 0.78rem !important;
+}
+
+/* ============================================================
+   ISS MISSION CLOCK FIX
+   ============================================================ */
+#mission-clock {
+    font-size: 0.95rem !important;
+}
+
+/* ============================================================
+   CHART BARS
+   ============================================================ */
+.chart-placeholder {
+    height: 90px !important;
+}
+
+/* ============================================================
+   SAFE AREA for iOS/Android notch support
+   ============================================================ */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .sidebar {
+        padding-bottom: env(safe-area-inset-bottom) !important;
+        height: calc(60px + env(safe-area-inset-bottom)) !important;
+    }
+    .main-content {
+        padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+    }
+}
+
+/* ============================================================
+   SCROLLING BEHAVIOR
+   ============================================================ */
+.phone-body {
+    -webkit-overflow-scrolling: touch !important;
+}
+
+section {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================
+   SIMULATOR INFO TABS
+   ============================================================ */
+.ops-controls[style*="margin-bottom"] {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 4px !important;
+}
+
+/* ============================================================
+   OBS SPACEX CARD
+   ============================================================ */
+#spacex-countdown {
+    font-size: 0.78rem !important;
+}
+
+/* ============================================================
+   NEO LIST
+   ============================================================ */
+.neo-item {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+}
+
+.neo-distance {
+    text-align: right !important;
+}
+
+/* ============================================================
+   SDG SECTION
+   ============================================================ */
+.sdg-header {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: flex-start !important;
+}
+
+/* ============================================================
+   RESPONSIVE FONT SCALE
+   ============================================================ */
+:root {
+    font-size: 14px;
+}

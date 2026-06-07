@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#020409">
+    <title>Aegis-Orbit — Inteligência Climática Orbital | FIAP GS 2026</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Android Mobile Override -->
+    <link rel="stylesheet" href="css/android.css">
+    <meta name="description" content="Aegis-Orbit - Aplicativo Android nativo de inteligência climática e monitoramento aeroespacial de anomalias (UAPs/SETI). Trabalho acadêmico FIAP Global Solution.">
+</head>
+<body>
+    <div class="bg-overlay"></div>
+
+    <!-- NASA Control Panel Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo-container">
+                <img src="assets/logo.png" alt="Aegis-Orbit Logo" class="logo-img">
+                <div>
+                    <span class="logo-text">AEGIS-ORBIT</span>
+                    <span class="logo-subtext">NASA EOS PARTNER</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" id="nav-dashboard" onclick="switchSection('dashboard')">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Sala de Telemetria</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-purpose" onclick="switchSection('purpose')">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>Missão Aegis</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-simulator" onclick="switchSection('simulator')">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                        <span>Simulador Android</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-presentation" onclick="switchSection('presentation')">
+                        <i class="fa-solid fa-file-invoice"></i>
+                        <span>Apresentação GS</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-observatory" onclick="switchSection('observatory')">
+                        <i class="fa-solid fa-meteor"></i>
+                        <span>Observatório</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-sdg" onclick="switchSection('sdg')">
+                        <i class="fa-solid fa-leaf"></i>
+                        <span>ODS Alinhamento</span>
+                    </a>
+                </li>
+            </nav>
+        </div>
+        <div class="sidebar-footer">
+            <div class="fiap-logo">FIAP GS</div>
+            <div class="project-tag">SOLUÇÃO ESPACIAL 2026</div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        
+        <!-- NASA Mission Clock Header -->
+        <header class="page-header">
+            <div class="header-title">
+                <h1 id="page-title-text">Painel de Operações Orbitais</h1>
+                <p id="page-subtitle-text">Monitoramento Climático por Satélite e Prevenção de Desastres Terrestres</p>
+            </div>
+            
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <!-- Voice Uplink Mic Button -->
+                <button id="btn-voice-uplink" onclick="toggleVoiceUplink()" class="btn-voice-mic" title="Ativar Comando de Voz">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span class="mic-wave"></span>
+                </button>
+                <!-- Mission Time UTC -->
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; text-align: right; border-right: 1px solid var(--glass-border); padding-right: 16px; color: var(--color-text-secondary);">
+                    <div>CLOCK (UTC/GMT)</div>
+                    <div id="mission-clock" style="font-size: 1.1rem; font-weight: 700; color: white;">14:52:22</div>
+                </div>
+                <div class="header-badge">
+                    <div class="pulse-dot"></div>
+                    <span id="sat-status">LINK: ACTIVE (SENTINEL-1A)</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Section 1: Dashboard -->
+        <section id="section-dashboard" class="dashboard-view">
+            <!-- Widgets Row -->
+            <div class="widgets-row">
+                <div class="widget-card">
+                    <div class="hud-corner-tr"></div>
+                    <div class="hud-corner-bl"></div>
+                    <div class="widget-icon cyan">
+                        <i class="fa-solid fa-satellite"></i>
+                    </div>
+                    <div class="widget-details">
+                        <h4>CONSTELLATION STATUS</h4>
+                        <div class="widget-value" id="val-sat-active">14 / SENTINEL-1</div>
+                    </div>
+                </div>
+                <div class="widget-card">
+                    <div class="hud-corner-tr"></div>
+                    <div class="hud-corner-bl"></div>
+                    <div class="widget-icon orange">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="widget-details">
+                        <h4>EARLY WARNINGS</h4>
+                        <div class="widget-value" id="val-critical-alerts">2 SECTORS</div>
+                    </div>
+                </div>
+                <div class="widget-card">
+                    <div class="hud-corner-tr"></div>
+                    <div class="hud-corner-bl"></div>
+                    <div class="widget-icon violet">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <div class="widget-details">
+                        <h4>AI PREDICTION ACCURACY</h4>
+                        <div class="widget-value">94.8%</div>
+                    </div>
+                </div>
+                <div class="widget-card">
+                    <div class="hud-corner-tr"></div>
+                    <div class="hud-corner-bl"></div>
+                    <div class="widget-icon emerald">
+                        <i class="fa-solid fa-house-shield"></i>
+                    </div>
+                    <div class="widget-details">
+                        <h4>POPULATION SAFEGUARDED</h4>
+                        <div class="widget-value">124,800 PAX</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Grid -->
+            <div class="dashboard-grid" style="margin-top: 24px;">
+                <!-- Left: Satellite Ops Map -->
+                <div class="hud-panel ops-center">
+                    <div class="ops-header">
+                        <h3 class="ops-title">SISTEMA DE OBSERVAÇÃO DA TERRA (EOS-HUD)</h3>
+                        <div class="ops-controls">
+                            <button class="btn-tab active" id="btn-map-sar" onclick="changeMapMode('sar')">SAR Radar (Inundações)</button>
+                            <button class="btn-tab" id="btn-map-thermal" onclick="changeMapMode('thermal')">Infravermelho TIRS (Incêndios)</button>
+                            <button class="btn-tab" id="btn-map-optical" onclick="changeMapMode('optical')">Óptico (Reflorestamento)</button>
+                            <button class="btn-tab" id="btn-map-skywatch" onclick="changeMapMode('skywatch')">SkyWatch (UAP/SETI)</button>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <!-- Dynamic Lat/Long Overlay -->
+                        <div class="map-hud-overlay">
+                            <div id="hud-lat">LAT: 22° 54' 13" S</div>
+                            <div id="hud-lon">LON: 43° 12' 35" W</div>
+                            <div id="hud-alt">ALT: 524.3 KM</div>
+                            <div id="hud-pass">PASS: LEO-SAR-4</div>
+                            <div id="hud-iss-status" style="display: none; color: var(--color-orange); font-size: 0.65rem; border-top: 1px solid rgba(255,145,0,0.2); margin-top: 4px; padding-top: 4px; font-weight: 700;">
+                                <i class="fa-solid fa-satellite-dish" style="animation: pulse 1s infinite alternate;"></i> ISS OUT OF RANGE
+                            </div>
+                        </div>
+
+                        <!-- SVG Earth Map Mockup -->
+                        <svg class="map-svg" viewBox="0 0 800 400" id="ops-map">
+                            <!-- Background grids -->
+                            <defs>
+                                <pattern id="map-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 229, 255, 0.05)" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#map-grid)" />
+                            
+                            <!-- Equator and Prime Meridian -->
+                            <line x1="0" y1="200" x2="800" y2="200" stroke="rgba(0,229,255,0.12)" stroke-dasharray="2" />
+                            <line x1="400" y1="0" x2="400" y2="400" stroke="rgba(0,229,255,0.12)" stroke-dasharray="2" />
+                            
+                            <!-- South America outlines -->
+                            <path id="map-continents" d="M 280,120 C 290,140 310,150 330,160 C 350,170 360,190 350,220 C 340,240 320,270 300,300 C 290,315 285,340 280,360 C 275,370 270,370 270,360 C 265,330 255,300 250,280 C 240,260 220,240 210,230 C 200,220 205,210 215,200 C 225,190 230,170 235,160 C 240,150 250,140 260,130 Z" fill="rgba(6, 9, 19, 0.8)" stroke="rgba(0, 229, 255, 0.25)" stroke-width="1.5" />
+                            
+                            <!-- Orbit Trajectories (Curves) -->
+                            <path id="orbit-path" d="M 100,350 Q 300,100 700,50" fill="none" stroke="rgba(213, 0, 249, 0.25)" stroke-width="1.5" stroke-dasharray="8,4" />
+                            
+                            <!-- Scanning Satellite -->
+                            <g id="satellite-node" transform="translate(100,350)">
+                                <circle r="6" fill="var(--color-cyan)" />
+                                <circle r="18" fill="none" stroke="var(--color-cyan)" stroke-dasharray="4" stroke-width="1" opacity="0.7">
+                                    <animate attributeName="r" values="6;24;6" dur="3s" repeatCount="indefinite" />
+                                </circle>
+                                <path d="M -12,-8 L 12,8 M -8,12 L 8,-12" stroke="var(--color-cyan)" stroke-width="1.5" />
+                                <!-- Scan cone -->
+                                <polygon points="0,0 -40,120 40,120" fill="rgba(0, 229, 255, 0.08)" id="scan-cone" />
+                            </g>
+                            
+                            <!-- Alerts Hotspots (interactive pins) -->
+                            <!-- Hotspot 1: Rio de Janeiro / Flood Alert -->
+                            <g class="alert-hotspot" id="hotspot-rio" transform="translate(290, 240)" onclick="selectHotspot('rio')" cursor="pointer">
+                                <circle r="8" fill="var(--color-red)" />
+                                <circle r="22" fill="none" stroke="var(--color-red)" stroke-width="1.5">
+                                    <animate attributeName="r" values="8;25;8" dur="1.5s" repeatCount="indefinite" />
+                                    <animate attributeName="opacity" values="1;0;1" dur="1.5s" repeatCount="indefinite" />
+                                </circle>
+                                <title>SETOR RIO-A: Risco Hidrológico Crítico</title>
+                            </g>
+
+                            <!-- Hotspot 2: Amazônia / Deforestation Burn -->
+                            <g class="alert-hotspot" id="hotspot-amazon" transform="translate(250, 170)" onclick="selectHotspot('amazon')" cursor="pointer">
+                                <circle r="8" fill="var(--color-orange)" />
+                                <circle r="22" fill="none" stroke="var(--color-orange)" stroke-width="1.5">
+                                    <animate attributeName="r" values="8;25;8" dur="2s" repeatCount="indefinite" />
+                                    <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite" />
+                                </circle>
+                                <title>SETOR NORTE-B: Alerta Térmico Landsat-9</title>
+                            </g>
+
+                            <!-- Target Crosshair -->
+                            <g id="map-target-crosshair" style="display: none;">
+                                <line id="crosshair-x" x1="0" y1="0" x2="800" y2="0" stroke="rgba(0, 229, 255, 0.35)" stroke-width="0.5" stroke-dasharray="2" />
+                                <line id="crosshair-y" x1="0" y1="0" x2="0" y2="400" stroke="rgba(0, 229, 255, 0.35)" stroke-width="0.5" stroke-dasharray="2" />
+                                <circle id="crosshair-ring1" cx="0" cy="0" r="14" fill="none" stroke="var(--color-cyan)" stroke-width="0.8" />
+                                <circle id="crosshair-ring2" cx="0" cy="0" r="6" fill="none" stroke="var(--color-cyan)" stroke-width="1.2" />
+                                <circle id="crosshair-dot" cx="0" cy="0" r="1.5" fill="var(--color-cyan)" />
+                            </g>
+
+                            <!-- Invisible Click Overlay to capture map clicks -->
+                            <rect width="100%" height="100%" fill="transparent" id="map-click-overlay" style="cursor: crosshair;" />
+                        </svg>
+                        
+                        <div style="position: absolute; bottom: 12px; left: 12px; font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-text-secondary); background: rgba(2,4,9,0.9); padding: 8px 12px; border: 1px solid var(--glass-border); pointer-events: none;">
+                            <i class="fa-solid fa-radar" style="color: var(--color-cyan); margin-right: 6px; animation: spin 4s linear infinite;"></i>CLIQUE NOS HOTSPOTS EM DESTAQUE PARA DETALHAR
+                        </div>
+                        
+                        <div style="position: absolute; bottom: 12px; right: 12px; font-family: var(--font-mono); font-size: 0.72rem;">
+                            <button id="btn-toggle-iss" onclick="toggleIssTracking()" class="btn-iss-track" style="background: rgba(2,4,9,0.9); padding: 6px 12px; border: 1px solid var(--glass-border); color: var(--color-text-secondary); cursor: pointer; border-radius: 2px; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-satellite" id="iss-toggle-icon"></i> <span>RASTREAR ISS REAL</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Telemetry Details -->
+                <div class="telemetry-side">
+                    <!-- Sector details -->
+                    <div class="hud-panel telemetry-box">
+                        <div class="box-title">
+                            <span>COBERTURA DE TELEMETRIA</span>
+                            <span id="active-sector-name" style="color: var(--color-cyan); font-weight: 700;">Setor Rio-A (Região Metropolitana)</span>
+                        </div>
+                        
+                        <!-- Mini details -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; font-family: var(--font-mono);">
+                            <div style="background: rgba(0,229,255,0.01); padding: 8px; border: 1px solid rgba(0,229,255,0.08);">
+                                <div style="font-size: 0.58rem; color: var(--color-text-muted);" id="telemetry-label-1">UMIDADE DE ENCOSTA (SAR)</div>
+                                <div id="lbl-moisture" style="font-size: 0.95rem; font-weight: 700; color: var(--color-red);">12.4% (Saturado)</div>
+                            </div>
+                            <div style="background: rgba(0,229,255,0.01); padding: 8px; border: 1px solid rgba(0,229,255,0.08);">
+                                <div style="font-size: 0.58rem; color: var(--color-text-muted);" id="telemetry-label-2">ANOMALIA TÉRMICA (TIRS)</div>
+                                <div id="lbl-temp" style="font-size: 0.95rem; font-weight: 700; color: var(--color-orange);">+4.18 °C</div>
+                            </div>
+                            <div style="background: rgba(0,229,255,0.01); padding: 8px; border: 1px solid rgba(0,229,255,0.08);">
+                                <div style="font-size: 0.58rem; color: var(--color-text-muted);" id="telemetry-label-3">ÍNDICE DE PRECIPITAÇÃO</div>
+                                <div id="lbl-rain" style="font-size: 0.95rem; font-weight: 700; color: white;">82 mm (24h)</div>
+                            </div>
+                            <div style="background: rgba(0,229,255,0.01); padding: 8px; border: 1px solid rgba(0,229,255,0.08);">
+                                <div style="font-size: 0.58rem; color: var(--color-text-muted);" id="telemetry-label-4">PROBABILIDADE DE DESASTRE</div>
+                                <div id="lbl-risk" style="font-size: 0.95rem; font-weight: 700; color: var(--color-red);">92% Landslide</div>
+                            </div>
+                        </div>
+
+                        <!-- Bar chart -->
+                        <div class="chart-placeholder">
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" id="bar-optical" style="height: 45%;"></div>
+                                <span class="chart-bar-label" id="bar-lbl-1">OPTICAL</span>
+                            </div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill violet" id="bar-radar" style="height: 85%;"></div>
+                                <span class="chart-bar-label" id="bar-lbl-2">RADAR</span>
+                            </div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill orange" id="bar-thermal" style="height: 60%;"></div>
+                                <span class="chart-bar-label" id="bar-lbl-3">THERMAL</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Space Weather Alert Hub -->
+                    <div class="hud-panel telemetry-box" id="space-weather-panel">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="box-title">
+                            <span>MONITOR DE CLIMA ESPACIAL</span>
+                            <span style="display:flex;gap:8px;align-items:center;">
+                                <button onclick="fetchNOAASpaceWeather()" style="background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.25); color: var(--color-cyan); padding: 1px 6px; font-family: var(--font-mono); font-size: 0.52rem; border-radius: 2px; cursor: pointer; text-transform:uppercase;" title="Atualizar dados NOAA/SWPC"><i class="fa-solid fa-arrows-rotate"></i></button>
+                                <span class="badge-solar-status" id="solar-status-badge" style="color: var(--color-emerald); font-family: var(--font-mono); font-size: 0.65rem;">SHIELD: ACTIVE</span>
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; font-family: var(--font-mono); font-size: 0.72rem;">
+                            <div class="weather-stat" style="background: rgba(0,229,255,0.01); padding: 6px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span style="color: var(--color-text-muted); font-size: 0.58rem; display:block;">VENTO SOLAR</span>
+                                <span id="val-solar-wind" style="font-weight: 700; color: var(--color-cyan); font-size: 0.85rem;">412 km/s</span>
+                            </div>
+                            <div class="weather-stat" style="background: rgba(0,229,255,0.01); padding: 6px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span style="color: var(--color-text-muted); font-size: 0.58rem; display:block;">FLUXO DE PRÓTONS</span>
+                                <span id="val-proton-flux" style="font-weight: 700; color: white; font-size: 0.85rem;">1.2 MeV</span>
+                            </div>
+                            <div class="weather-stat" style="background: rgba(0,229,255,0.01); padding: 6px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span style="color: var(--color-text-muted); font-size: 0.58rem; display:block;">FLUXO RAIO-X</span>
+                                <span id="val-solar-flare" style="font-weight: 700; color: var(--color-emerald); font-size: 0.85rem;">B-CLASS</span>
+                            </div>
+                            <div class="weather-stat" style="background: rgba(0,229,255,0.01); padding: 6px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span style="color: var(--color-text-muted); font-size: 0.58rem; display:block;">ATIVIDADE GEOMAGNÉTICA</span>
+                                <span id="val-kp-index" style="font-weight: 700; color: var(--color-cyan); font-size: 0.85rem;">Kp 2</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Solar Storm Simulator Slider -->
+                        <div style="margin-top: 10px; border-top: 1px solid var(--glass-border); padding-top: 8px;">
+                            <div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--color-text-secondary); display: flex; justify-content: space-between;">
+                                <span>SIMULAR ATIVIDADE GEOMAGNÉTICA</span>
+                                <span id="lbl-kp-slider" style="color: var(--color-cyan); font-weight:700;">Kp 2 (Estável)</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                                <input type="range" id="kp-range-slider" min="1" max="9" value="2" style="flex-grow: 1; accent-color: var(--color-cyan); height: 4px; border-radius: 2px; background: rgba(0, 229, 255, 0.2); outline: none;" oninput="updateSpaceWeather(this.value)">
+                                <span style="font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-red); font-weight: 700; border: 1px solid rgba(255,23,68,0.3); padding: 2px 6px; border-radius: 2px; cursor: pointer; background: rgba(255,23,68,0.05); user-select: none;" onclick="triggerSolarFlare()">FLARE!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============================================================
+                         PAINEL METEOROLÓGICO MULTI-API
+                         Open-Meteo (sem chave) + OpenWeatherMap + WeatherAPI
+                    ============================================================ -->
+                    <div class="hud-panel telemetry-box" id="weather-hub-panel" style="margin-top: 16px;">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="box-title">
+                            <span><i class="fa-solid fa-cloud-sun-rain" style="margin-right:5px;color:var(--color-cyan);"></i>HUB METEOROLÓGICO GLOBAL</span>
+                            <span style="display:flex;gap:6px;align-items:center;">
+                                <button onclick="fetchAllWeather()" title="Atualizar todos os dados" style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);color:var(--color-cyan);padding:2px 8px;font-family:var(--font-mono);font-size:0.52rem;border-radius:2px;cursor:pointer;text-transform:uppercase;"><i class="fa-solid fa-arrows-rotate"></i> SYNC</button>
+                                <span id="weather-hub-status" style="color:var(--color-emerald);font-family:var(--font-mono);font-size:0.62rem;">CONECTANDO...</span>
+                            </span>
+                        </div>
+
+                        <!-- Fonte Ativa + Cidade -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:5px 8px;background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.1);">
+                            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-text-muted);">FONTE ATIVA</span>
+                            <span id="weather-source-label" style="font-family:var(--font-mono);font-size:0.62rem;color:var(--color-cyan);font-weight:700;">Open-Meteo (sem chave)</span>
+                            <span id="weather-city-label" style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-text-secondary);">São Paulo, BR</span>
+                        </div>
+
+                        <!-- Grid Principal: Temperatura + Condição + Sensação -->
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;">
+                            <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);padding:8px;text-align:center;">
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--color-text-muted);">TEMPERATURA</div>
+                                <div id="wx-temp" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--color-cyan);">—</div>
+                                <div id="wx-condition" style="font-size:0.58rem;color:var(--color-text-secondary);margin-top:2px;">—</div>
+                            </div>
+                            <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);padding:8px;text-align:center;">
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--color-text-muted);">SENSAÇÃO TÉRMICA</div>
+                                <div id="wx-feels" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--color-orange);">—</div>
+                                <div id="wx-humidity" style="font-size:0.58rem;color:var(--color-text-secondary);margin-top:2px;">Hum: —</div>
+                            </div>
+                            <div style="background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);padding:8px;text-align:center;">
+                                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--color-text-muted);">VENTO</div>
+                                <div id="wx-wind" style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--color-emerald);">—</div>
+                                <div id="wx-wind-dir" style="font-size:0.58rem;color:var(--color-text-secondary);margin-top:2px;">Dir: —</div>
+                            </div>
+                        </div>
+
+                        <!-- Linha 2: UV + Precipitação + Visibilidade + Pressão -->
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;">
+                            <div style="background:rgba(255,145,0,0.05);border:1px solid rgba(255,145,0,0.15);padding:6px;text-align:center;">
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);font-family:var(--font-mono);">ÍNDICE UV</div>
+                                <div id="wx-uv" style="font-size:0.95rem;font-weight:700;color:var(--color-orange);font-family:var(--font-mono);">—</div>
+                                <div id="wx-uv-level" style="font-size:0.48rem;color:var(--color-text-muted);">—</div>
+                            </div>
+                            <div style="background:rgba(11,61,145,0.08);border:1px solid rgba(11,61,145,0.3);padding:6px;text-align:center;">
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);font-family:var(--font-mono);">CHUVA ATUAL</div>
+                                <div id="wx-rain" style="font-size:0.95rem;font-weight:700;color:var(--color-cyan);font-family:var(--font-mono);">—</div>
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);">mm/h</div>
+                            </div>
+                            <div style="background:rgba(0,229,255,0.03);border:1px solid rgba(0,229,255,0.1);padding:6px;text-align:center;">
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);font-family:var(--font-mono);">VISIBILIDADE</div>
+                                <div id="wx-visibility" style="font-size:0.95rem;font-weight:700;color:white;font-family:var(--font-mono);">—</div>
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);">km</div>
+                            </div>
+                            <div style="background:rgba(213,0,249,0.04);border:1px solid rgba(213,0,249,0.15);padding:6px;text-align:center;">
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);font-family:var(--font-mono);">PRESSÃO</div>
+                                <div id="wx-pressure" style="font-size:0.95rem;font-weight:700;color:var(--color-violet);font-family:var(--font-mono);">—</div>
+                                <div style="font-size:0.48rem;color:var(--color-text-muted);">hPa</div>
+                            </div>
+                        </div>
+
+                        <!-- Qualidade do Ar (Open-Meteo Air Quality API) -->
+                        <div style="margin-top:10px;border-top:1px solid var(--glass-border);padding-top:8px;">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-text-secondary);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
+                                <span><i class="fa-solid fa-wind" style="margin-right:4px;"></i>QUALIDADE DO AR (AQI) — Open-Meteo</span>
+                                <span id="wx-aqi-badge" style="font-size:0.58rem;padding:1px 5px;border-radius:2px;background:rgba(0,255,102,0.1);color:var(--color-emerald);border:1px solid rgba(0,255,102,0.3);">BOA</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+                                <div style="background:rgba(255,255,255,0.02);padding:5px;border:1px solid rgba(0,229,255,0.06);text-align:center;">
+                                    <div style="font-size:0.45rem;color:var(--color-text-muted);font-family:var(--font-mono);">PM2.5</div>
+                                    <div id="wx-pm25" style="font-size:0.82rem;font-weight:700;font-family:var(--font-mono);">—</div>
+                                    <div style="font-size:0.42rem;color:var(--color-text-muted);">µg/m³</div>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.02);padding:5px;border:1px solid rgba(0,229,255,0.06);text-align:center;">
+                                    <div style="font-size:0.45rem;color:var(--color-text-muted);font-family:var(--font-mono);">PM10</div>
+                                    <div id="wx-pm10" style="font-size:0.82rem;font-weight:700;font-family:var(--font-mono);">—</div>
+                                    <div style="font-size:0.42rem;color:var(--color-text-muted);">µg/m³</div>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.02);padding:5px;border:1px solid rgba(0,229,255,0.06);text-align:center;">
+                                    <div style="font-size:0.45rem;color:var(--color-text-muted);font-family:var(--font-mono);">NO₂</div>
+                                    <div id="wx-no2" style="font-size:0.82rem;font-weight:700;font-family:var(--font-mono);">—</div>
+                                    <div style="font-size:0.42rem;color:var(--color-text-muted);">µg/m³</div>
+                                </div>
+                                <div style="background:rgba(255,255,255,0.02);padding:5px;border:1px solid rgba(0,229,255,0.06);text-align:center;">
+                                    <div style="font-size:0.45rem;color:var(--color-text-muted);font-family:var(--font-mono);">OZÔNIO</div>
+                                    <div id="wx-ozone" style="font-size:0.82rem;font-weight:700;font-family:var(--font-mono);">—</div>
+                                    <div style="font-size:0.42rem;color:var(--color-text-muted);">µg/m³</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previsão 7 dias (tira horizontal) -->
+                        <div style="margin-top:10px;border-top:1px solid var(--glass-border);padding-top:8px;">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-text-secondary);margin-bottom:6px;">
+                                <i class="fa-solid fa-calendar-days" style="margin-right:4px;"></i>PREVISÃO 7 DIAS — Open-Meteo
+                            </div>
+                            <div id="wx-forecast-strip" style="display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;">
+                                <!-- Populated by JS -->
+                                <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-text-muted);padding:8px;">Carregando previsão...</div>
+                            </div>
+                        </div>
+
+                        <!-- Alerta Defesa Civil / Risco -->
+                        <div style="margin-top:8px;border-top:1px solid var(--glass-border);padding-top:8px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                                <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-text-secondary);font-weight:700;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px;color:var(--color-orange);"></i>ALERTA OPERACIONAL — DEFESA CIVIL SP</span>
+                                <span id="sp-alert-badge" class="badge-lock success" style="font-size:0.5rem;padding:1px 4px;">ESTÁVEL</span>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-family:var(--font-mono);font-size:0.68rem;">
+                                <div style="background:rgba(0,229,255,0.02);padding:6px;border:1px solid rgba(0,229,255,0.08);">
+                                    <div style="font-size:0.5rem;color:var(--color-text-muted);">ESTAÇÃO SP</div>
+                                    <div id="sp-station-temp" style="font-weight:700;color:var(--color-cyan);">—</div>
+                                </div>
+                                <div style="background:rgba(0,229,255,0.02);padding:6px;border:1px solid rgba(0,229,255,0.08);">
+                                    <div style="font-size:0.5rem;color:var(--color-text-muted);">PRECIPITAÇÃO</div>
+                                    <div id="sp-station-rain" style="font-weight:700;color:white;">0.0 mm</div>
+                                </div>
+                                <div style="background:rgba(0,229,255,0.02);padding:6px;border:1px solid rgba(0,229,255,0.08);">
+                                    <div style="font-size:0.5rem;color:var(--color-text-muted);">RISCO ACUMULADO</div>
+                                    <div id="sp-disaster-risk" style="font-weight:700;color:var(--color-emerald);">BAIXO</div>
+                                </div>
+                            </div>
+                            <p id="sp-alert-desc" style="font-size:0.57rem;color:var(--color-text-muted);margin:5px 0 0 0;line-height:1.3;">Carregando dados de alerta da Defesa Civil...</p>
+                        </div>
+
+                        <!-- Configuração de APIs opcionais (OpenWeatherMap + WeatherAPI) -->
+                        <div style="margin-top:10px;border-top:1px solid var(--glass-border);padding-top:8px;">
+                            <div style="font-family:var(--font-mono);font-size:0.6rem;color:var(--color-cyan);font-weight:700;margin-bottom:6px;"><i class="fa-solid fa-key" style="margin-right:4px;"></i>FONTES OPCIONAIS (chaves gratuitas)</div>
+                            
+                            <!-- OpenWeatherMap -->
+                            <div style="margin-bottom:6px;">
+                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--color-text-secondary);margin-bottom:3px;">OpenWeatherMap — <a href="https://openweathermap.org/api" target="_blank" style="color:var(--color-cyan);">openweathermap.org/api</a></div>
+                                <div style="display:flex;gap:5px;">
+                                    <input type="password" id="input-owm-key" placeholder="Cole sua chave gratuita aqui..." style="flex-grow:1;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.18);border-radius:2px;padding:4px 6px;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-cyan);outline:none;">
+                                    <button onclick="saveWeatherKey('owm')" style="background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.35);color:var(--color-cyan);padding:2px 8px;font-family:var(--font-mono);font-size:0.6rem;border-radius:2px;cursor:pointer;">SALVAR</button>
+                                </div>
+                            </div>
+
+                            <!-- WeatherAPI -->
+                            <div>
+                                <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--color-text-secondary);margin-bottom:3px;">WeatherAPI — <a href="https://www.weatherapi.com" target="_blank" style="color:var(--color-cyan);">weatherapi.com</a> (UV + Fases da Lua + Alertas)</div>
+                                <div style="display:flex;gap:5px;">
+                                    <input type="password" id="input-wapi-key" placeholder="Cole sua chave gratuita aqui..." style="flex-grow:1;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.18);border-radius:2px;padding:4px 6px;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-cyan);outline:none;">
+                                    <button onclick="saveWeatherKey('wapi')" style="background:rgba(0,229,255,0.12);border:1px solid rgba(0,229,255,0.35);color:var(--color-cyan);padding:2px 8px;font-family:var(--font-mono);font-size:0.6rem;border-radius:2px;cursor:pointer;">SALVAR</button>
+                                </div>
+                            </div>
+
+                            <!-- Dados extras quando WeatherAPI está ativa -->
+                            <div id="wapi-extras" style="display:none;margin-top:8px;display:none;">
+                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-family:var(--font-mono);font-size:0.65rem;">
+                                    <div style="background:rgba(255,255,255,0.02);padding:6px;border:1px solid rgba(0,229,255,0.08);text-align:center;">
+                                        <div style="font-size:0.48rem;color:var(--color-text-muted);">FASE DA LUA</div>
+                                        <div id="wapi-moon" style="font-weight:700;">—</div>
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.02);padding:6px;border:1px solid rgba(0,229,255,0.08);text-align:center;">
+                                        <div style="font-size:0.48rem;color:var(--color-text-muted);">AMANHECER</div>
+                                        <div id="wapi-sunrise" style="font-weight:700;color:var(--color-orange);">—</div>
+                                    </div>
+                                    <div style="background:rgba(255,255,255,0.02);padding:6px;border:1px solid rgba(0,229,255,0.08);text-align:center;">
+                                        <div style="font-size:0.48rem;color:var(--color-text-muted);">PÔR DO SOL</div>
+                                        <div id="wapi-sunset" style="font-weight:700;color:var(--color-violet);">—</div>
+                                    </div>
+                                </div>
+                                <div id="wapi-alerts-box" style="display:none;margin-top:6px;background:rgba(255,23,68,0.05);border:1px solid rgba(255,23,68,0.2);padding:6px;font-size:0.58rem;color:var(--color-red);font-family:var(--font-mono);">
+                                    <strong>⚠ ALERTAS WEATHERAPI:</strong>
+                                    <div id="wapi-alerts-text" style="color:var(--color-text-muted);margin-top:2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+                            <button onclick="fetchAllWeather()" style="background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.35);color:var(--color-cyan);padding:5px;font-family:var(--font-mono);font-size:0.55rem;border-radius:2px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;" onmouseover="this.style.background='rgba(0,229,255,0.2)'" onmouseout="this.style.background='rgba(0,229,255,0.1)'">
+                                <i class="fa-solid fa-arrows-rotate" style="margin-right:3px;"></i> Atualizar Clima
+                            </button>
+                            <button onclick="triggerEmergencyAlertSP()" style="background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.35);color:var(--color-red);padding:5px;font-family:var(--font-mono);font-size:0.55rem;border-radius:2px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;" onmouseover="this.style.background='rgba(255,23,68,0.2)'" onmouseout="this.style.background='rgba(255,23,68,0.1)'">
+                                <i class="fa-solid fa-triangle-exclamation" style="margin-right:3px;"></i> Simular Alerta
+                            </button>
+                        </div>
+                        <span id="defesa-civil-status" style="display:none;"></span>
+                    </div>
+
+                    <!-- Live Satellite Feed console logs -->
+                    <div class="hud-panel telemetry-box" style="margin-top: 16px;">
+                        <div class="box-title">
+                            <span>CONSOLE DE AÇÕES TELEMÉTRICAS</span>
+                            <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--color-cyan);">STREAMING ACTIVE</span>
+                        </div>
+                        <div class="console-logs" id="console-terminal">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- API Diagnostics & Connection Status -->
+                    <div class="hud-panel telemetry-box" style="margin-top: 16px;">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="box-title">
+                            <span>DIAGNÓSTICO DE UPLINK E APIS</span>
+                            <span id="api-diagnostics-overall" class="badge-solar-status" style="color: var(--color-emerald); font-family: var(--font-mono); font-size: 0.65rem;">API: ONLINE</span>
+                        </div>
+                        <div class="api-diag-grid" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px; font-family: var(--font-mono); font-size: 0.68rem;">
+                            <!-- NASA APOD -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>NASA APOD API</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-nasa-apod" style="color: var(--color-text-muted);">0ms</span>
+                                    <span id="status-nasa-apod" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(0, 229, 255, 0.1); color: var(--color-cyan); border-color: rgba(0, 229, 255, 0.3);">CONNECTING</span>
+                                </div>
+                            </div>
+                            <!-- NASA NEO -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>NASA NEO (Asteroides)</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-nasa-neo" style="color: var(--color-text-muted);">0ms</span>
+                                    <span id="status-nasa-neo" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(0, 229, 255, 0.1); color: var(--color-cyan); border-color: rgba(0, 229, 255, 0.3);">CONNECTING</span>
+                                </div>
+                            </div>
+                            <!-- SpaceX Launches -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>SpaceX Launch API</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-spacex" style="color: var(--color-text-muted);">0ms</span>
+                                    <span id="status-spacex" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(0, 229, 255, 0.1); color: var(--color-cyan); border-color: rgba(0, 229, 255, 0.3);">CONNECTING</span>
+                                </div>
+                            </div>
+                            <!-- ISS Position -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>ISS Locator API</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-iss" style="color: var(--color-text-muted);">0ms</span>
+                                    <span id="status-iss" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(0, 229, 255, 0.1); color: var(--color-cyan); border-color: rgba(0, 229, 255, 0.3);">CONNECTING</span>
+                                </div>
+                            </div>
+                            <!-- INMET / Open-Meteo -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>Open-Meteo Weather</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-inmet-alerts" style="color: var(--color-text-muted);">0ms</span>
+                                    <span id="status-inmet-alerts" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(0, 229, 255, 0.1); color: var(--color-cyan); border-color: rgba(0, 229, 255, 0.3);">CONNECTING</span>
+                                </div>
+                            </div>
+                            <!-- Open-Meteo Air Quality -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>Open-Meteo Air Quality</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-openmeteo-aq" style="color: var(--color-text-muted);">0ms</span>
+                                    <span id="status-openmeteo-aq" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(0, 229, 255, 0.1); color: var(--color-cyan); border-color: rgba(0, 229, 255, 0.3);">CONNECTING</span>
+                                </div>
+                            </div>
+                            <!-- OpenWeatherMap -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>OpenWeatherMap API</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-owm" style="color: var(--color-text-muted);">—</span>
+                                    <span id="status-owm" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(255,255,255,0.04); color: var(--color-text-muted); border-color: rgba(255,255,255,0.1);">SEM CHAVE</span>
+                                </div>
+                            </div>
+                            <!-- WeatherAPI -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.01); padding: 5px 8px; border: 1px solid rgba(0,229,255,0.06);">
+                                <span>WeatherAPI.com</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span id="ping-wapi" style="color: var(--color-text-muted);">—</span>
+                                    <span id="status-wapi" class="badge-lock" style="padding: 1px 4px; font-size: 0.55rem; background: rgba(255,255,255,0.04); color: var(--color-text-muted); border-color: rgba(255,255,255,0.1);">SEM CHAVE</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- NASA API Key Configuration Manager -->
+                        <div style="margin-top: 10px; border-top: 1px solid var(--glass-border); padding-top: 8px; display: flex; flex-direction: column; gap: 4px;">
+                            <span style="font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-text-secondary); text-transform: uppercase;">Chave API da NASA (APOD)</span>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="password" id="input-nasa-key" placeholder="Usando DEMO_KEY pública..." style="flex-grow: 1; background: rgba(0, 229, 255, 0.04); border: 1px solid rgba(0, 229, 255, 0.18); border-radius: 2px; padding: 4px 6px; font-family: var(--font-mono); font-size: 0.6rem; color: var(--color-cyan); outline: none;">
+                                <button onclick="saveNasaKey()" style="background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.35); color: var(--color-cyan); padding: 2px 8px; font-family: var(--font-mono); font-size: 0.65rem; border-radius: 2px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(0, 229, 255, 0.25)'" onmouseout="this.style.background='rgba(0, 229, 255, 0.12)'">SALVAR</button>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-size: 0.52rem; color: var(--color-text-muted); line-height: 1.2;">Opcional — <a href="https://api.nasa.gov" target="_blank" style="color: var(--color-cyan); text-decoration: underline;">api.nasa.gov</a>. Sem chave, o app usa o espelho keyless automaticamente.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Special Purpose Aegis-Orbit -->
+        <section id="section-purpose" class="purpose-grid hidden">
+            <!-- Left Info Panel -->
+            <div class="hud-panel purpose-text">
+                <h2>Missão Aegis-Orbit</h2>
+                <p>A <strong>Aegis-Orbit</strong> é um propósito especial humanitário concebido sob diretrizes da NASA Earth Science. A missão unifica a infraestrutura espacial de órbita baixa para combater duas grandes crises globais simultaneamente: o **deslocamento forçado por desastres climáticos** e a **perda acelerada de cobertura vegetal nativa** nas cidades do Sul Global.</p>
+                
+                <p style="font-size: 0.9rem; color: var(--color-text-muted);">A nossa tese propõe que satélites não devem apenas documentar o declínio ecológico da Terra, mas atuar como escudos digitais preventivos e canais de incentivo financeiro para as micro-comunidades periféricas.</p>
+                
+                <h3>Ciclo de Operação da Missão</h3>
+                
+                <div class="infographic-steps" id="info-steps-container">
+                    <div class="info-step-card active" onclick="showPurposeStep(1)">
+                        <div class="info-step-num">01</div>
+                        <div>
+                            <div class="info-step-title">Varredura de Micro-Deformações (SAR)</div>
+                            <div class="info-step-desc">Satélites Sentinel-1 emitem pulsos de radar na banda C. A interferometria espacial (InSAR) mede deformações milimétricas no solo de encostas urbanas.</div>
+                        </div>
+                    </div>
+                    <div class="info-step-card" onclick="showPurposeStep(2)">
+                        <div class="info-step-num">02</div>
+                        <div>
+                            <div class="info-step-title">Predição por Rede Neural Preditiva</div>
+                            <div class="info-step-desc">A IA correlaciona a inclinação do terreno com a saturação de umidade detectada no solo e índices de chuva. Ela projeta o colapso estrutural 24h antes.</div>
+                        </div>
+                    </div>
+                    <div class="info-step-card" onclick="showPurposeStep(3)">
+                        <div class="info-step-num">03</div>
+                        <div>
+                            <div class="info-step-title">Uplink e Alerta via Rede de Órbita Baixa (LEO)</div>
+                            <div class="info-step-desc">Em caso de colapso de infraestruturas locais de dados, satélites LEO compactam o sinal de alerta e disparam diretamente para os celulares da comunidade.</div>
+                        </div>
+                    </div>
+                    <div class="info-step-card" onclick="showPurposeStep(4)">
+                        <div class="info-step-num">04</div>
+                        <div>
+                            <div class="info-step-title">Evacuação Topográfica Offline</div>
+                            <div class="info-step-desc">Os usuários recebem rotas de fuga offline. A rota calcula declives seguros e evita desmoronamentos com base no Modelo Digital de Elevação (DEM).</div>
+                        </div>
+                    </div>
+                    <div class="info-step-card" onclick="showPurposeStep(5)">
+                        <div class="info-step-num">05</div>
+                        <div>
+                            <div class="info-step-title">Auditoria e Eco-Crédito de Carbono</div>
+                            <div class="info-step-desc">Pós-emergência, a comunidade planta mudas. Satélites ópticos Sentinel-2 monitoram o crescimento e a IA valida créditos de carbono convertidos em renda direta.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Visual Panel (Dynamic Visualizations) -->
+            <div style="display: flex; flex-direction: column;">
+                <div class="hud-panel infographic-viz-box" id="info-viz-container">
+                    <!-- SVG Graphics update via JS -->
+                    <div class="infographic-viz-canvas" id="info-viz-canvas">
+                        <!-- Initial Step 1 Graphics -->
+                    </div>
+                    <div class="infographic-viz-title" id="info-viz-title">Etapa 01: Interferometria InSAR</div>
+                    <div class="infographic-viz-desc" id="info-viz-desc">Representação gráfica da órbita do satélite gerando feixes de radar SAR para mapeamento de solo.</div>
+                </div>
+                
+                <div class="hud-panel" style="margin-top: 16px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-cyan);">
+                    <h4 style="margin-bottom: 6px; font-weight: 700;"><i class="fa-solid fa-microchip"></i> DETALHES DA INFRAESTRUTURA ESPACIAL:</h4>
+                    • Radar de Abertura Sintética (SAR) Sentinel-1 (Banda-C)<br>
+                    • Radiômetro Landsat-9 TIRS (Bandas 10 e 11 Térmicas)<br>
+                    • Imageador de Cobertura Vegetal Sentinel-2 MSI (Óptico)<br>
+                    • Antenas e Constelação LEO de Baixo Custo (Aegis Uplink)
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Simulator Android -->
+        <section id="section-simulator" class="simulator-layout hidden">
+            <!-- Left Info Panel with Tabs -->
+            <div class="hud-panel simulator-info">
+                <div class="ops-controls" style="margin-bottom: 16px; border-bottom: 1px solid rgba(0, 229, 255, 0.15); padding-bottom: 10px; display: flex; gap: 8px;">
+                    <button class="btn-tab active" id="btn-sim-features" onclick="switchSimTab('features')">Recursos do App</button>
+                    <button class="btn-tab" id="btn-sim-code" onclick="switchSimTab('code')">Código Kotlin Android</button>
+                    <button class="btn-tab" id="btn-sim-terminal" onclick="switchSimTab('terminal')">Console ADB Shell</button>
+                </div>
+                
+                <!-- Tab Features Content -->
+                <div id="sim-tab-features">
+                    <h2>Aegis Android Native App</h2>
+                    <p>O aplicativo **Aegis-Orbit** foi desenvolvido como uma solução **Android Nativa**, escrita em **Kotlin** com interface declarativa em **Jetpack Compose**. Esta arquitetura técnica garante o máximo de desempenho no processamento local de dados geográficos e o acesso a APIs de baixo nível de hardware.</p>
+                    
+                    <h3>Arquitetura Nativa Android</h3>
+                    <div class="feature-list" style="margin-bottom: 20px;">
+                        <div class="feature-item">
+                            <i class="fa-brands fa-android" style="color: var(--color-emerald);"></i>
+                            <div>
+                                <div class="feature-item-title">Android Satellite API Integration</div>
+                                <div class="feature-item-desc">Utiliza a API NTN do Android 14/15 para conexões Direct-to-Cell. Permite enviar relatórios de ajuda diretamente a satélites de órbita baixa LEO quando não há sinal celular.</div>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fa-solid fa-database"></i>
+                            <div>
+                                <div class="feature-item-title">Room Local Database (Mapas DEM)</div>
+                                <div class="feature-item-desc">Salva localmente as matrizes topográficas de altitude (Modelos de Elevação Digital ALOS). A Room do Android processa o cálculo de rotas sem latência e 100% offline.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Módulos e Recursos no Telefone</h3>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fa-solid fa-compass"></i>
+                            <div>
+                                <div class="feature-item-title">Rotas de Fuga Segura</div>
+                                <div class="feature-item-desc">Exibição de caminhos seguros calculados localmente com base na declividade do solo, evitando desmoronamentos.</div>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fa-solid fa-eye"></i>
+                            <div>
+                                <div class="feature-item-title">Aegis SkyWatch (UAPs & SETI)</div>
+                                <div class="feature-item-desc">Detecção e reporte colaborativo de fenômenos aéreos anômalos. A IA do aplicativo Android cruza a imagem com a órbita de satélites locais (como Starlink) em tempo real.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Code Content -->
+                <div id="sim-tab-code" class="hidden">
+                    <h2 style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--color-cyan); margin-bottom: 12px; text-transform: uppercase;">
+                        CÓDIGO FONTE KOTLIN (ANDROID STUDIO)
+                    </h2>
+                    
+                    <div class="ops-controls" style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 4px;">
+                        <button class="btn-tab active" id="btn-file-main" onclick="loadAndroidCode('main')">MainActivity.kt</button>
+                        <button class="btn-tab" id="btn-file-map" onclick="loadAndroidCode('map')">MapScreen.kt</button>
+                        <button class="btn-tab" id="btn-file-tracker" onclick="loadAndroidCode('tracker')">TrackerScreen.kt</button>
+                        <button class="btn-tab" id="btn-file-sky" onclick="loadAndroidCode('sky')">SkyWatchScreen.kt</button>
+                        <button class="btn-tab" id="btn-file-db" onclick="loadAndroidCode('db')">AppDatabase.kt</button>
+                        <button class="btn-tab" id="btn-file-report" onclick="loadAndroidCode('report')">CivilReport.kt</button>
+                        <button class="btn-tab" id="btn-file-uap" onclick="loadAndroidCode('uap')">UapSighting.kt</button>
+                        <button class="btn-tab" id="btn-file-starry" onclick="loadAndroidCode('starry')">StarryBackground.kt</button>
+                        <button class="btn-tab" id="btn-file-api" onclick="loadAndroidCode('api')">AegisApiService.kt</button>
+                        <button class="btn-tab" id="btn-file-gradle" onclick="loadAndroidCode('gradle')">build.gradle.kts</button>
+                    </div>
+
+                    <div style="position: relative; border: 1px solid rgba(0, 229, 255, 0.15); border-radius: 4px; overflow: hidden; background: #010205;">
+                        <pre style="margin: 0; padding: 12px; font-family: var(--font-mono); font-size: 0.72rem; color: #a5d6ff; overflow: auto; max-height: 290px; line-height: 1.4;"><code id="android-code-display">// Carregando arquivo...</code></pre>
+                    </div>
+                </div>
+
+                <!-- Tab Terminal Content -->
+                <div id="sim-tab-terminal" class="hidden">
+                    <h2 style="font-family: var(--font-mono); font-size: 0.95rem; color: var(--color-cyan); margin-bottom: 4px; text-transform: uppercase;">
+                        CONSOLE INTERATIVO ADB SHELL
+                    </h2>
+                    <p style="font-size: 0.7rem; color: var(--color-text-muted); margin-bottom: 12px; line-height: 1.4;">
+                        Execute comandos diretamente no dispositivo virtual <strong style="color: var(--color-cyan);">Aegis_Pixel_8_Pro_LEO</strong> para inspecionar o status de telemetria Room e handshakes de órbita.
+                    </p>
+                    
+                    <!-- Quick Action Commands Buttons -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                        <button class="btn-tab" style="font-size: 0.65rem; border-color: rgba(0, 229, 255, 0.25);" onclick="runAdbCommand('help')">help</button>
+                        <button class="btn-tab" style="font-size: 0.65rem; border-color: rgba(0, 229, 255, 0.25);" onclick="runAdbCommand('adb devices')">adb devices</button>
+                        <button class="btn-tab" style="font-size: 0.65rem; border-color: rgba(0, 229, 255, 0.25);" onclick="runAdbCommand('aegis ntn --status')">aegis ntn --status</button>
+                        <button class="btn-tab" style="font-size: 0.65rem; border-color: rgba(0, 229, 255, 0.25);" onclick="runAdbCommand('aegis telemetry --fetch')">aegis telemetry</button>
+                        <button class="btn-tab" style="font-size: 0.65rem; border-color: rgba(0, 229, 255, 0.25);" onclick="runAdbCommand('aegis uap --scan')">aegis uap --scan</button>
+                        <button class="btn-tab" style="font-size: 0.65rem; border-color: rgba(255, 23, 68, 0.25); color: var(--color-red);" onclick="runAdbCommand('clear')">clear</button>
+                    </div>
+                    
+                    <!-- Interactive Terminal Window -->
+                    <div class="adb-terminal-window" style="border: 1px solid rgba(0, 229, 255, 0.15); border-radius: 4px; overflow: hidden; background: #010205; display: flex; flex-direction: column; height: 320px; font-family: var(--font-mono); font-size: 0.72rem;">
+                        <div class="adb-terminal-header" style="background: rgba(0, 229, 255, 0.05); padding: 6px 12px; border-bottom: 1px solid rgba(0, 229, 255, 0.15); color: var(--color-text-secondary); display: flex; justify-content: space-between; align-items: center; font-size: 0.62rem; letter-spacing: 0.5px;">
+                            <span>TERMINAL SHELL: aegis_pixel_8_pro:/$</span>
+                            <span style="color: var(--color-emerald);"><i class="fa-solid fa-circle" style="font-size: 0.4rem; vertical-align: middle; margin-right: 4px;"></i> ADB CONNECTED</span>
+                        </div>
+                        
+                        <div class="adb-terminal-output" id="adb-terminal-output" style="flex-grow: 1; padding: 12px; color: #a5d6ff; overflow-y: auto; line-height: 1.45; word-wrap: break-word;">
+                            <div>* Daemon system started successfully *</div>
+                            <div>Type "help" to see available command list.</div>
+                            <div>&nbsp;</div>
+                        </div>
+                        
+                        <div class="adb-terminal-input-row" style="display: flex; align-items: center; background: rgba(0,229,255,0.02); border-top: 1px solid rgba(0,229,255,0.1); padding: 4px 8px;">
+                            <span style="color: var(--color-cyan); margin-right: 8px; font-weight: bold; pointer-events: none;">$</span>
+                            <input type="text" id="adb-terminal-input" style="flex-grow: 1; background: transparent; border: none; outline: none; color: white; font-family: var(--font-mono); font-size: 0.72rem; padding: 4px 0;" placeholder="Digite um comando shell..." onkeydown="handleAdbInput(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Phone Simulator (Android Google Pixel Style) -->
+            <div class="mobile-device-container">
+                <div class="phone-skeleton">
+                    <!-- Google Pixel Punch-Hole Camera -->
+                    <div class="phone-punch-hole"></div>
+                    
+                    <div class="phone-screen">
+                        <!-- Android Status Bar -->
+                        <div class="phone-status-bar">
+                            <span id="phone-time">14:52</span>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <i class="fa-solid fa-satellite-dish" style="color: var(--color-cyan);" title="Satlink NTN Ativo"></i>
+                                <i class="fa-solid fa-wifi"></i>
+                                <i class="fa-solid fa-battery-full"></i>
+                            </div>
+                        </div>
+
+                        <!-- Satellite Uplink Loader Overlay -->
+                        <div class="sat-loader" id="phone-sat-loader">
+                            <div class="sat-loader-spinner"></div>
+                            <div class="sat-loader-text" id="phone-sat-loader-text">Locking LEO Sat...</div>
+                            <div class="sat-loader-sub" id="phone-sat-loader-sub">Tentando uplink orbital com LEO-3</div>
+                        </div>
+
+                        <!-- Phone Body -->
+                        <div class="phone-body">
+                            
+                            <!-- Screen 1: Lock Screen -->
+                            <div class="phone-screen-content lockscreen active" id="phone-screen-lock">
+                                <div class="lockscreen-time">
+                                    <h2 id="lock-clock">14:52</h2>
+                                    <p id="lock-date">Carregando...</p>
+                                </div>
+                                <div class="lockscreen-notification" onclick="unlockToScreen('navigation')" style="cursor: pointer;">
+                                    <div class="notification-header">
+                                        <span>AEGIS DISASTER RESPONSE</span>
+                                        <span>agora</span>
+                                    </div>
+                                    <div class="notification-title">Alerta Vermelho: Inundação</div>
+                                    <div class="notification-body">Risco iminente de inundação em seu setor. Rota de fuga offline baseada em elevação espacial ativa. Toque.</div>
+                                </div>
+                                <div class="lockscreen-footer">
+                                    <i class="fa-solid fa-chevron-up"></i><br>
+                                    Deslize para cima para abrir
+                                </div>
+                            </div>
+
+                            <!-- Screen 2: Navigation Map (Offline Route) -->
+                            <div class="phone-screen-content" id="phone-screen-navigation" style="padding-top: 10px;">
+                                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; display: flex; align-items: center; justify-content: space-between;">
+                                    <span>Rotas de Fuga Segura</span>
+                                    <span class="credits-badge" style="background: rgba(255, 23, 68, 0.1); border-color: rgba(255, 23, 68, 0.3); color: var(--color-red);">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Emergência
+                                    </span>
+                                </div>
+                                
+                                <div class="phone-map-container">
+                                    <!-- A simulated local map with danger/safe route -->
+                                    <svg viewBox="0 0 280 140" style="width: 100%; height: 100%; fill: #0f1224;">
+                                        <rect width="100%" height="100%" fill="#020409" />
+                                        <line x1="30" y1="0" x2="30" y2="140" stroke="rgba(0, 229, 255, 0.03)" />
+                                        <line x1="100" y1="0" x2="100" y2="140" stroke="rgba(0, 229, 255, 0.03)" />
+                                        <line x1="180" y1="0" x2="180" y2="140" stroke="rgba(0, 229, 255, 0.03)" />
+                                        
+                                        <!-- Danger Zone -->
+                                        <circle cx="90" cy="90" r="45" fill="rgba(255, 23, 68, 0.15)" stroke="rgba(255, 23, 68, 0.4)" stroke-width="1" />
+                                        <circle cx="90" cy="90" r="10" fill="var(--color-red)" />
+                                        <text x="80" y="70" fill="var(--color-red)" font-size="7" font-weight="700" font-family="monospace">ZONA DE RISCO</text>
+
+                                        <!-- Safe Zone -->
+                                        <circle cx="210" cy="40" r="12" fill="rgba(0, 255, 102, 0.2)" stroke="var(--color-emerald)" stroke-width="1.5" />
+                                        <text x="180" y="22" fill="var(--color-emerald)" font-size="7" font-weight="700" font-family="monospace">PONTO SEGURO</text>
+                                        
+                                        <!-- Route -->
+                                        <circle cx="60" cy="40" r="5" fill="var(--color-cyan)" />
+                                        <text x="50" y="30" fill="var(--color-cyan)" font-size="7" font-weight="700" font-family="monospace">VOCÊ</text>
+
+                                        <path d="M 60,40 L 130,35 L 170,60 L 210,40" fill="none" stroke="var(--color-cyan)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2, 2">
+                                            <animate attributeName="stroke-dashoffset" values="20;0" dur="2s" repeatCount="indefinite" />
+                                        </path>
+                                    </svg>
+                                </div>
+
+                                <div class="phone-card">
+                                    <div class="phone-card-title"><i class="fa-solid fa-compass"></i> Rota de Evasão Ativa</div>
+                                    <div class="phone-card-value">Distância: 820m | Elevação: Segura (+12m)</div>
+                                    <div class="phone-card-value" style="margin-top: 4px; font-size: 0.65rem; color: var(--color-emerald);">
+                                        <i class="fa-solid fa-circle-check"></i> Esta rota evita declives de alto risco geomorfológico.
+                                    </div>
+                                </div>
+                                <button class="phone-btn" onclick="phoneToast('Iniciando navegação guiada offline.')">Iniciar Orientação Offline</button>
+                            </div>
+
+                            <!-- Screen 3: Send Offline Report -->
+                            <div class="phone-screen-content" id="phone-screen-report">
+                                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; margin-bottom: 8px;">
+                                    Reportar Ocorrência
+                                </div>
+                                <p style="font-size: 0.65rem; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.3;">
+                                    Seus dados celulares estão indisponíveis. Envie sua localização e chamados de ajuda via uplink satelital.
+                                </p>
+
+                                <div class="report-option selected" id="opt-alagamento" onclick="selectReport('alagamento')">
+                                    <i class="fa-solid fa-droplet" style="color: var(--color-cyan); width: 16px;"></i>
+                                    <span>Alagamento / Enchente</span>
+                                </div>
+                                <div class="report-option" id="opt-deslizamento" onclick="selectReport('deslizamento')">
+                                    <i class="fa-solid fa-mountain" style="color: var(--color-orange); width: 16px;"></i>
+                                    <span>Deslizamento de Terra</span>
+                                </div>
+                                <div class="report-option" id="opt-obstrucao" onclick="selectReport('obstrucao')">
+                                    <i class="fa-solid fa-road-barrier" style="color: var(--color-red); width: 16px;"></i>
+                                    <span>Obstrução de Via / Queda de Árvore</span>
+                                </div>
+
+                                <textarea class="form-input" style="height: 60px; font-size: 0.7rem; background: rgba(255,255,255,0.03); margin-top: 8px;" placeholder="Descreva brevemente a situação..."></textarea>
+                                
+                                <button class="phone-btn" onclick="triggerSatelliteUpload()">
+                                    <i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Transmitir via Satélite LEO
+                                </button>
+                            </div>
+
+                            <!-- Screen 4: Aegis SkyWatch (UAPs & SETI) -->
+                            <div class="phone-screen-content" id="phone-screen-skywatch">
+                                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span>Aegis SkyWatch</span>
+                                    <span class="credits-badge" style="background: rgba(213,0,249,0.05); border-color: rgba(213,0,249,0.25); color: var(--color-violet);">
+                                        <i class="fa-solid fa-user-astronaut"></i> SETI ACTIVE
+                                    </span>
+                                </div>
+                                
+                                <p style="font-size: 0.65rem; color: var(--color-text-secondary); line-height: 1.3; margin-bottom: 8px;">
+                                    Escaner ionosférico e registro de anomalias aéreas (UAPs) integrado com a base de dados NASA/EOS.
+                                </p>
+
+                                <!-- Radar Scanner Simulator -->
+                                <div class="radar-container">
+                                    <div class="radar-sweep"></div>
+                                    <div class="radar-blip anomaly1"></div>
+                                    <div class="radar-blip anomaly2"></div>
+                                </div>
+
+                                <div class="phone-card" style="margin-bottom: 6px; padding: 10px;">
+                                    <div class="phone-card-title" style="color: var(--color-violet); font-size: 0.75rem;"><i class="fa-solid fa-bullseye"></i> Alerta SkyWatch</div>
+                                    <div class="phone-card-value" style="font-size: 0.62rem;" id="phone-uap-status">Anomalia ionosférica ativa detectada sobre Setor Rio-A. Assinatura: UAP-1.</div>
+                                </div>
+
+                                <button class="phone-btn" style="background: linear-gradient(90deg, var(--color-violet) 0%, var(--color-nasa-blue) 100%); border-color: var(--color-violet);" onclick="reportUAPAnomaly()">
+                                    <i class="fa-solid fa-camera" style="margin-right: 6px;"></i> Reportar Anomalia Luminosa
+                                </button>
+                            </div>
+
+                            <!-- Screen 5: Eco Score & Reforestation -->
+                            <div class="phone-screen-content" id="phone-screen-eco">
+                                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Comunidade Verde</span>
+                                    <span class="credits-badge"><i class="fa-solid fa-leaf"></i> 640 ECO</span>
+                                </div>
+
+                                <div class="green-score-container">
+                                    <div class="green-radial">780 XP</div>
+                                    <div style="font-size: 0.7rem; max-width: 140px; color: var(--color-text-secondary);">
+                                        <strong style="color: var(--color-emerald);">Nível 4 Guardião</strong><br>
+                                        Sua área foi validada como "Área Reforestada" via análise multiespectral óptica.
+                                    </div>
+                                </div>
+
+                                <div class="phone-card">
+                                    <div class="phone-card-title" style="color: var(--color-emerald);"><i class="fa-solid fa-circle-check"></i> Recompensas Disponíveis</div>
+                                    <div class="phone-card-value" style="font-size: 0.65rem;">
+                                        - Desconto na tarifa de energia: <strong>400 ECO</strong><br>
+                                        <button class="phone-btn" style="background: linear-gradient(90deg, var(--color-emerald) 0%, var(--color-cyan) 100%);" onclick="phoneToast('Recompensa resgatada com sucesso!')">Resgatar Crédito de Carbono</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Screen 6: Aegis Satellite Tracker & Align tool -->
+                            <div class="phone-screen-content" id="phone-screen-tracker">
+                                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <span>Rastreamento LEO</span>
+                                    <span class="credits-badge" id="phone-tracker-badge" style="background: rgba(255, 23, 68, 0.1); border-color: rgba(255, 23, 68, 0.3); color: var(--color-red);">
+                                        <i class="fa-solid fa-satellite"></i> SEM SINAL
+                                    </span>
+                                </div>
+                                <p style="font-size: 0.65rem; color: var(--color-text-secondary); line-height: 1.3; margin-bottom: 8px;">
+                                    Mova o dispositivo virtual para alinhar com o satélite Aegis-LEO mais próximo.
+                                </p>
+
+                                <!-- Antenna Align UI -->
+                                <div class="align-compass-container">
+                                    <div class="align-target" id="align-target-node"></div>
+                                    <div class="align-arrow" id="align-arrow-pointer"></div>
+                                    <div class="compass-circle c1"></div>
+                                    <div class="compass-circle c2"></div>
+                                    <div class="compass-circle c3"></div>
+                                    <div class="compass-axis-h"></div>
+                                    <div class="compass-axis-v"></div>
+                                </div>
+
+                                <div class="phone-card" style="margin-top: 10px; margin-bottom: 8px; padding: 10px;">
+                                    <div class="phone-card-title" id="phone-tracker-title" style="color: var(--color-cyan); font-size: 0.75rem;"><i class="fa-solid fa-wifi"></i> Conexão Satelital</div>
+                                    <div class="phone-card-value" style="font-size: 0.62rem;" id="phone-tracker-status">Sinal: Desconectado. Calibração necessária.</div>
+                                </div>
+
+                                <button class="phone-btn" style="background: linear-gradient(90deg, var(--color-cyan) 0%, var(--color-nasa-blue) 100%);" id="btn-align-ant" onclick="triggerAntennaAlignment()">
+                                    <i class="fa-solid fa-compass" style="margin-right: 6px;"></i> Alinhar Antena virtual
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <!-- Phone Bottom Nav Bar (Android Gesture Pill at bottom) -->
+                        <div class="phone-nav-bar" id="phone-bottom-nav">
+                            <button class="phone-nav-btn active" id="p-nav-navigation" onclick="unlockToScreen('navigation')">
+                                <i class="fa-solid fa-location-arrow"></i>
+                                <span>Rotas</span>
+                            </button>
+                            <button class="phone-nav-btn" id="p-nav-report" onclick="unlockToScreen('report')">
+                                <i class="fa-solid fa-bullhorn"></i>
+                                <span>Reportar</span>
+                            </button>
+                            <button class="phone-nav-btn" id="p-nav-tracker" onclick="unlockToScreen('tracker')">
+                                <i class="fa-solid fa-satellite"></i>
+                                <span>Tracker</span>
+                            </button>
+                            <button class="phone-nav-btn" id="p-nav-skywatch" onclick="unlockToScreen('skywatch')">
+                                <i class="fa-solid fa-user-astronaut"></i>
+                                <span>SkyWatch</span>
+                            </button>
+                            <button class="phone-nav-btn" id="p-nav-eco" onclick="unlockToScreen('eco')">
+                                <i class="fa-solid fa-leaf"></i>
+                                <span>Eco</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Android Home Gesture Pill -->
+                        <div class="phone-gesture-pill"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Academic Presentation -->
+        <section id="section-presentation" class="hud-panel presentation-container hidden">
+            <!-- Left: Presentation Slides -->
+            <div class="slide-deck" id="slides-view">
+                
+                <!-- Slide 1: Cover -->
+                <div class="slide active" id="slide-1">
+                    <div class="slide-cover">
+                        <div class="slide-header">FIAP - GLOBAL SOLUTION 2026</div>
+                        <h1>AEGIS-ORBIT</h1>
+                        <p class="subtitle" style="color: var(--color-text-secondary); margin-bottom: 24px; font-family: var(--font-mono); text-transform: uppercase;">Aplicativo Android Nativo & Inteligência Espacial</p>
+                        
+                        <div class="slide-members">
+                            <div class="slide-member-item">RM <span id="slide-rm-1">563172</span> - <strong id="slide-name-1">Kalicon Amorim da Cruz Souza</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2: O Problema -->
+                <div class="slide" id="slide-2">
+                    <div class="slide-header">CONCEITO & DIAGNÓSTICO</div>
+                    <div class="slide-title">Desastres Climáticos e Vácuo de Comunicação</div>
+                    <div class="slide-body">
+                        <p>O aumento drástico de eventos climáticos extremos como enchentes rápidas, focos de incêndio e deslizamentos geológicos em áreas urbanas de risco impõe enormes desafios:</p>
+                        <ul>
+                            <li><strong>Tempo de resposta e zonas cegas:</strong> Sensores e radares tradicionais terrestres não conseguem prever deformações geológicas microscópicas na estrutura de solos de encostas.</li>
+                            <li><strong>Colapso da Infraestrutura Terrestre:</strong> Durante catástrofes, as antenas de telefonia celular (4G/5G) e a rede elétrica são frequentemente destruídas, deixando a população desprotegida e incomunicável.</li>
+                            <li><strong>Identificação e Prevenção de Fenômenos Anômalos:</strong> Falta de ferramentas que integrem o sensoriamento orbital de UAPs e a detecção precoce de perturbações eletromagnéticas na atmosfera.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 3: A Solução (Kotlin Android App) -->
+                <div class="slide" id="slide-3">
+                    <div class="slide-header">ARQUITETURA ANDROID & IA</div>
+                    <div class="slide-title">Aplicativo Nativo Android & Dados Espaciais</div>
+                    <div class="slide-body">
+                        <p>O **Aegis-Orbit** resolve esses gargalos integrando uma arquitetura de app nativo Android a três camadas de tecnologia espacial:</p>
+                        <ul>
+                            <li><strong>Desenvolvimento Nativo Kotlin (Material 3):</strong> Desenvolvido com Jetpack Compose. Utiliza banco de dados **Room** para salvar offline mapas digitais de altitude (DEM ALOS/Lidar), calculando rotas sem internet.</li>
+                            <li><strong>Integração com Android Satellite API:</strong> Conectividade via rede NTN (Direct-to-Cell), permitindo o envio de relatórios de emergência diretamente aos satélites em caso de apagão terrestre.</li>
+                            <li><strong>Aegis SkyWatch (SETI & UAPs):</strong> Um módulo Android com scanner ionosférico em Realidade Aumentada. Permite o crowdsourcing de avistamentos de UAPs, cruzados pela IA espacial contra órbitas locais para fins de pesquisa científica da NASA.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 4: Arquitetura e Fluxo do App -->
+                <div class="slide" id="slide-4">
+                    <div class="slide-header">INFRAESTRUTURA DE DADOS</div>
+                    <div class="slide-title">Fluxo de Dados Orbital</div>
+                    <div class="slide-body">
+                        <p>Como as informações transitam no ecossistema Aegis-Orbit:</p>
+                        <div style="background: rgba(0, 229, 255, 0.02); padding: 12px; border: 1px solid rgba(0, 229, 255, 0.15); border-radius: 2px; font-family: var(--font-mono); font-size: 0.72rem; margin-top: 10px; line-height: 1.4; color: var(--color-cyan);">
+                            [1. Satélites: Sentinel-1 SAR / Sentinel-2 OPTICAL / Landsat TIRS]<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v (Downlink de Dados Brutos de Telemetria)<br>
+                            [2. Aegis Cloud Engine: IA de Predição Geológica e Climática]<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+---&gt; [3A. Dashboard Operacional de Defesa Civil (HUD)]<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v (Compactação de Geo-Alertas via Satélites LEO de passagem)<br>
+                            [4. Smartphone: App Android Kotlin com Rotas Offline e Satlink NTN]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Diferenciais Competitivos -->
+                <div class="slide" id="slide-5">
+                    <div class="slide-header">DIFERENCIAIS DA PLATAFORMA</div>
+                    <div class="slide-title">Inovação e Vantagem Tecnológica</div>
+                    <div class="slide-body">
+                        <ul>
+                            <li><strong>Uplink Nativo Android Direct-to-Cell:</strong> Transmissão direta de dados de ajuda civil usando satélites LEO, imunes à queda de redes terrestres 4G/5G.</li>
+                            <li><strong>Rotas de Evasão Inteligentes Offline (Room DB):</strong> Processamento instantâneo no dispositivo Android de caminhos seguros contra novos deslizamentos, sem latência.</li>
+                            <li><strong>Detecção Descentralizada de Anomalias (Aegis SkyWatch):</strong> Análise de anomalias ionosféricas ópticas e rádio-espectrais integradas à rede da NASA, com detecção colaborativa e filtros inteligentes de UAPs.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 6: ODS ONU Vinculadas -->
+                <div class="slide" id="slide-6">
+                    <div class="slide-header">IMPACTO GLOBAL E SUSTENTABILIDADE</div>
+                    <div class="slide-title">Conexão Estrita com as ODS da ONU</div>
+                    <div class="slide-body">
+                        <p>O Aegis-Orbit atua diretamente no cumprimento da agenda global 2030:</p>
+                        <ul>
+                            <li><strong>ODS 11 (Cidades e Comunidades Sustentáveis):</strong> Proteção e salvaguarda imediata de assentamentos em áreas periféricas propensas a catástrofes climáticas.</li>
+                            <li><strong>ODS 13 (Ação Climática):</strong> Mecanismos práticos de adaptação e resiliência comunitária contra as mudanças do clima.</li>
+                            <li><strong>ODS 9 (Indústria, Inovação e Infraestrutura):</strong> Desenvolvimento de uma nova malha de infraestrutura civil digital baseada em tecnologia aeroespacial para o bem social.</li>
+                            <li><strong>ODS 2 & ODS 8:</strong> Fortalece a resiliência agrícola contra secas extremas e estimula a economia verde através dos micro-créditos de carbono locais.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Slide 7: Pitch de Vídeo e Encerramento -->
+                <div class="slide" id="slide-7">
+                    <div class="slide-header">APRESENTAÇÃO & PITCH</div>
+                    <div class="slide-title">Vídeo Pitch de 3 Minutos</div>
+                    <div class="slide-body">
+                        <p>Assista ao pitch detalhado de apresentação do Aegis-Orbit:</p>
+                        
+                        <!-- Video Mockup -->
+                        <div class="video-mockup" id="pitch-video-wrapper" onclick="openPitchVideo()">
+                            <img src="assets/background.png" alt="Video Thumbnail">
+                            <div class="video-play-btn">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                            <div class="video-mockup-text" id="video-link-label">Clique para Assistir no YouTube</div>
+                        </div>
+                        <p style="font-size: 0.75rem; text-align: center; margin-top: 8px; color: var(--color-text-muted);" id="video-url-display">URL do Vídeo: Indefinida. Insira ao lado.</p>
+                    </div>
+                </div>
+
+                <!-- Slide Navigation Footer -->
+                <div class="slide-footer">
+                    <span class="slide-number" id="slide-num-label">Slide 1 de 7</span>
+                    <div class="slide-controls">
+                        <button class="slide-btn" id="btn-slide-prev" onclick="changeSlide(-1)" disabled><i class="fa-solid fa-arrow-left"></i></button>
+                        <button class="slide-btn" id="btn-slide-next" onclick="changeSlide(1)"><i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Config Panel -->
+            <div class="presentation-controls">
+                <div class="hud-panel" style="padding: 16px;">
+                    <h3 style="font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 12px; color: var(--color-cyan); text-transform: uppercase;"><i class="fa-solid fa-user-edit"></i> Dados do Aluno</h3>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Nome Completo</label>
+                        <input type="text" class="form-input" id="input-name-1" value="Kalicon Amorim da Cruz Souza" oninput="updatePresentationData()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>RM</label>
+                        <input type="text" class="form-input" id="input-rm-1" value="563172" oninput="updatePresentationData()">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 12px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
+                        <label><i class="fa-brands fa-youtube" style="color: #ff1744;"></i> Link do Pitch (YouTube)</label>
+                        <input type="text" class="form-input" id="input-youtube" placeholder="https://www.youtube.com/watch?v=..." oninput="updatePresentationData()">
+                    </div>
+                </div>
+
+                <div class="hud-panel md-copy-area" style="padding: 16px;">
+                    <h4 style="font-family: var(--font-mono); font-size: 0.75rem; margin-bottom: 8px; color: var(--color-cyan); text-transform: uppercase;"><i class="fa-solid fa-copy"></i> Conteúdo Acadêmico</h4>
+                    <p style="font-size: 0.7rem; color: var(--color-text-secondary); margin-bottom: 10px; line-height: 1.4;">Copie a estrutura textual dos slides formatada em Markdown para usar no relatório técnico ou PowerPoint.</p>
+                    <button class="phone-btn" style="margin-top: 0; font-size: 0.75rem;" onclick="copyMarkdownText()"><i class="fa-solid fa-file-export"></i> Copiar em Markdown</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: SDGs Alignment -->
+        <section id="section-sdg" class="hud-panel hidden">
+            <h2 style="font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 8px; color: white;">Conexão com os ODS da ONU</h2>
+            <p style="color: var(--color-text-secondary); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.6;">O aplicativo Aegis-Orbit foi concebido para alinhar a economia espacial aos Objetivos de Desenvolvimento Sustentável das Nações Unidas (ONU), demonstrando como tecnologias de ponta orbitais solucionam desafios humanos concretos.</p>
+            
+            <div class="sdg-container">
+                <!-- ODS 9 -->
+                <div class="sdg-card">
+                    <div class="sdg-num ods9">9</div>
+                    <div class="sdg-title">Indústria, Inovação e Infraestrutura</div>
+                    <div class="sdg-desc">Integra a infraestrutura aeroespacial e telecomunicação de órbita baixa para prover resiliência cibernética e novos modelos de negócios focados em monitoramento.</div>
+                </div>
+
+                <!-- ODS 11 -->
+                <div class="sdg-card">
+                    <div class="sdg-num ods11">11</div>
+                    <div class="sdg-title">Cidades e Comunidades Sustentáveis</div>
+                    <div class="sdg-desc">Previne perdas humanas em áreas urbanas de alta vulnerabilidade a desastres geológicos e hidrológicos através de rotas de fuga offline.</div>
+                </div>
+
+                <!-- ODS 13 -->
+                <div class="sdg-card">
+                    <div class="sdg-num ods13">13</div>
+                    <div class="sdg-title">Ação Contra a Mudança Global do Clima</div>
+                    <div class="sdg-desc">Mapeia gases de efeito estufa e oferece adaptabilidade de emergência para as populações urbanas que sofrem com o aumento de catástrofes climáticas.</div>
+                </div>
+
+                <!-- ODS 2 -->
+                <div class="sdg-card">
+                    <div class="sdg-num ods2">2</div>
+                    <div class="sdg-title">Fome Zero e Agricultura Sustentável</div>
+                    <div class="sdg-desc">Usa satélites ópticos e radar para monitorar safras urbanas de subsistência e prever secas severas que ameacem o sustento comunitário local.</div>
+                </div>
+
+                <!-- ODS 8 -->
+                <div class="sdg-card">
+                    <div class="sdg-num ods8">8</div>
+                    <div class="sdg-title">Trabalho Decente e Crescimento Econômico</div>
+                    <div class="sdg-desc">Estimula a economia verde através do modelo de Eco-Crédito verificado por satélite, promovendo inovação sustentável e recompensando boas práticas ambientais locais.</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 32px; padding: 20px; background: rgba(0, 229, 255, 0.03); border: 1px solid rgba(0, 229, 255, 0.15); border-radius: 2px;">
+                <h3 style="font-family: var(--font-heading); color: var(--color-cyan); font-size: 1.15rem; margin-bottom: 8px;"><i class="fa-solid fa-satellite-dish"></i> O Papel da Economia Espacial na Sociedade</h3>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: var(--color-text-secondary);">A exploração espacial e os investimentos em constelações de pequenos satélites reduzem o custo de obtenção de dados geográficos e climáticos. O Aegis-Orbit representa a concretização desse avanço tecnológico, provando que o investimento espacial reflete em benefícios econômicos, sociais e de segurança imediata para a vida na Terra. A inovação tecnológica se torna, assim, um agente de impacto civil direto.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Observatório Espacial (NASA Live Data) -->
+        <section id="section-observatory" class="hidden">
+            <div class="obs-grid">
+                <!-- Left Column: APOD + ISS -->
+                <div class="obs-left-col">
+                    <!-- NASA APOD Card -->
+                    <div class="hud-panel obs-apod-card">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="obs-section-header">
+                            <span><i class="fa-solid fa-camera-retro"></i> Observação Óptica e Espectral</span>
+                            <button class="btn-tab" onclick="fetchAPOD()" style="font-size:0.65rem;"><i class="fa-solid fa-arrows-rotate"></i> Recarregar API</button>
+                        </div>
+                        <div class="lens-selector-row">
+                            <button class="btn-lens-select active" id="btn-lens-live" onclick="selectTelescopeView('live')"><i class="fa-solid fa-wifi"></i> NASA Live (APOD)</button>
+                            <button class="btn-lens-select" id="btn-lens-nebula" onclick="selectTelescopeView('nebula')"><i class="fa-solid fa-circle-nodes"></i> Lente H-Alpha (Nebulosa)</button>
+                            <button class="btn-lens-select" id="btn-lens-blackhole" onclick="selectTelescopeView('blackhole')"><i class="fa-solid fa-circle-dot"></i> Lente Gravitacional (M87*)</button>
+                            <button class="btn-lens-select" id="btn-lens-solar" onclick="selectTelescopeView('solar')"><i class="fa-solid fa-sun"></i> Canal Heliofísico (CME)</button>
+                        </div>
+                        <div id="apod-container" class="apod-container">
+                            <div class="apod-loading" id="apod-loading">
+                                <div class="sat-loader-spinner"></div>
+                                <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--color-cyan);">Conectando com api.nasa.gov...</span>
+                            </div>
+                            <img id="apod-image" class="apod-image" src="" alt="NASA APOD" style="display:none;">
+                            <div id="apod-video" class="apod-video" style="display:none;"></div>
+                        </div>
+                        <h3 id="apod-title" class="apod-title">Carregando...</h3>
+                        <p id="apod-date" class="apod-date"></p>
+                        <p id="apod-explanation" class="apod-explanation"></p>
+                        <p id="apod-copyright" class="apod-copyright"></p>
+                    </div>
+
+                    <!-- ISS Tracker Card -->
+                    <div class="hud-panel obs-iss-card">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="obs-section-header">
+                            <span><i class="fa-solid fa-space-shuttle"></i> Rastreamento da ISS em Tempo Real</span>
+                            <span id="iss-update-time" style="font-family:var(--font-mono);font-size:0.65rem;color:var(--color-text-muted);"></span>
+                        </div>
+                        <div class="iss-data-row">
+                            <div class="iss-data-item">
+                                <span class="iss-label">LATITUDE</span>
+                                <span class="iss-value" id="iss-lat">&mdash;</span>
+                            </div>
+                            <div class="iss-data-item">
+                                <span class="iss-label">LONGITUDE</span>
+                                <span class="iss-value" id="iss-lon">&mdash;</span>
+                            </div>
+                            <div class="iss-data-item">
+                                <span class="iss-label">VELOCIDADE</span>
+                                <span class="iss-value" id="iss-velocity-real" style="color:var(--color-emerald);">~27.600 km/h</span>
+                            </div>
+                            <div class="iss-data-item">
+                                <span class="iss-label">ALTITUDE</span>
+                                <span class="iss-value" id="iss-altitude-real" style="color:var(--color-orange);">~408 km</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SpaceX Launch & Celestial Card -->
+                    <div class="hud-panel obs-spacex-card">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="obs-section-header">
+                            <span><i class="fa-solid fa-rocket"></i> Lançamentos e Ciclo Celestial</span>
+                            <span id="spacex-status" class="badge-lock success" style="font-family: var(--font-mono); font-size: 0.65rem;">AGENDADO</span>
+                        </div>
+                        <div class="spacex-moon-grid" style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 16px; padding: 10px 0;">
+                            <!-- SpaceX column -->
+                            <div>
+                                <div class="spacex-header-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                    <div id="spacex-patch-container" style="background: rgba(255,255,255,0.03); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--color-cyan);">
+                                        <i class="fa-solid fa-shuttle-space" style="color: var(--color-cyan); font-size: 1.1rem;"></i>
+                                    </div>
+                                    <div style="flex-grow: 1;">
+                                        <div id="spacex-mission-name" style="font-family: var(--font-display); font-size: 0.8rem; font-weight: 700; color: white;">Carregando missão...</div>
+                                        <div id="spacex-rocket-name" style="font-family: var(--font-mono); font-size: 0.62rem; color: var(--color-cyan);">FOGUETE: Falcon 9</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="spacex-countdown-row" style="background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.08); padding: 6px 10px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--color-text-muted);">T-MINUS:</span>
+                                    <strong id="spacex-countdown" style="font-family: var(--font-mono); font-size: 0.85rem; color: #ff9100; letter-spacing: 0.5px;">00d 00h 00m 00s</strong>
+                                </div>
+
+                                <div style="font-size: 0.65rem; line-height: 1.35; color: var(--color-text-muted); font-family: var(--font-mono);" id="spacex-details">
+                                    Buscando telemetria de lançamento ativo da base de dados SpaceX...
+                                </div>
+                            </div>
+                            <!-- Moon column -->
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid rgba(255,255,255,0.06); padding-left: 12px;">
+                                <span style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--color-text-muted); margin-bottom: 6px; text-transform: uppercase;">Fase da Lua Local</span>
+                                <canvas id="moon-phase-canvas" width="80" height="80" style="border-radius: 50%; background: #020409;"></canvas>
+                                <span id="moon-phase-name" style="font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-cyan); margin-top: 6px; text-align: center; font-weight: 700;">LUA CHEIA (100%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: NEO Asteroids + Sightings -->
+                <div class="obs-right-col">
+                    <!-- NEO Asteroids -->
+                    <div class="hud-panel obs-neo-card">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="obs-section-header">
+                            <span><i class="fa-solid fa-meteor"></i> Asteroides Próximos da Terra (NEO)</span>
+                            <button class="btn-tab" onclick="fetchNEO()" style="font-size:0.65rem;"><i class="fa-solid fa-arrows-rotate"></i> Atualizar</button>
+                        </div>
+                        <p style="font-size:0.72rem;color:var(--color-text-muted);margin-bottom:12px;font-family:var(--font-mono);">Fonte: NASA JPL Near-Earth Object Web Service (NeoWs)</p>
+                        <div id="neo-container" class="neo-list">
+                            <div class="apod-loading">
+                                <div class="sat-loader-spinner"></div>
+                                <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--color-cyan);">Buscando objetos próximos...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Community Sightings Board -->
+                    <div class="hud-panel obs-sightings-card">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="obs-section-header">
+                            <span><i class="fa-solid fa-binoculars"></i> Avistamentos da Comunidade</span>
+                        </div>
+                        <div class="sighting-feed">
+                            <div class="sighting-item">
+                                <div class="sighting-icon" style="color:var(--color-violet);"><i class="fa-solid fa-circle-radiation"></i></div>
+                                <div>
+                                    <div class="sighting-title">Anomalia Luminosa — Setor Rio-A</div>
+                                    <div class="sighting-meta">Hoje 03:12 UTC · Verificado pela IA Orbital · <span style="color:var(--color-violet);">UAP-CLASS 1</span></div>
+                                </div>
+                            </div>
+                            <div class="sighting-item">
+                                <div class="sighting-icon" style="color:var(--color-cyan);"><i class="fa-solid fa-meteor"></i></div>
+                                <div>
+                                    <div class="sighting-title">Bólido (Meteoro Brilhante) — Litoral SP</div>
+                                    <div class="sighting-meta">Ontem 22:47 UTC · Confirmado por satélite Sentinel-2 · <span style="color:var(--color-emerald);">NATURAL</span></div>
+                                </div>
+                            </div>
+                            <div class="sighting-item">
+                                <div class="sighting-icon" style="color:var(--color-orange);"><i class="fa-solid fa-satellite"></i></div>
+                                <div>
+                                    <div class="sighting-title">Passagem de Starlink-G4 · Falso Positivo</div>
+                                    <div class="sighting-meta">28 Mai 19:04 UTC · Descartado automaticamente pelo filtro de órbitas · <span style="color:var(--color-text-muted);">STARLINK</span></div>
+                                </div>
+                            </div>
+                            <div class="sighting-item">
+                                <div class="sighting-icon" style="color:var(--color-red);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                <div>
+                                    <div class="sighting-title">Distúrbio Eletromagnético Ionosférico — AM</div>
+                                    <div class="sighting-meta">27 Mai 01:33 UTC · Em análise pela IA · <span style="color:var(--color-red);">NÃO CLASSIFICADO</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SETI Radio Decrypter Card -->
+                    <div class="hud-panel obs-seti-card" style="margin-top: 16px;">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="obs-section-header">
+                            <span><i class="fa-solid fa-satellite-dish"></i> DECODIFICADOR DE SINAIS DE RÁDIO SETI</span>
+                            <span id="seti-lock-badge" class="badge-lock" style="color: var(--color-text-muted); font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">Aguardando Sinal</span>
+                        </div>
+                        <p style="font-size:0.72rem;color:var(--color-text-muted);margin-bottom:8px;font-family:var(--font-mono);">
+                            Sintonizador de ondas curtas acoplado aos radiotelescópios de Orion-SETI.
+                        </p>
+                        
+                        <!-- Waterfall spectrogram canvas -->
+                        <div class="seti-waterfall-container" style="position: relative; background: #010205; border: 1px solid rgba(0, 229, 255, 0.15); height: 110px; border-radius: 2px; overflow: hidden; margin-bottom: 8px;">
+                            <canvas id="seti-waterfall-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+                            <div id="seti-tuning-line" style="position: absolute; left: 42%; top: 0; bottom: 0; width: 1.5px; background: var(--color-red); pointer-events: none; opacity: 0.8; display: none; box-shadow: 0 0 8px var(--color-red);">
+                                <div style="position: absolute; top: 2px; left: 4px; font-size: 0.5rem; font-family: var(--font-mono); color: var(--color-red); font-weight: bold; background: #010205; padding: 1px 3px; border: 0.5px solid rgba(255,23,68,0.5);">LOCK</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Frequency slider and tuner -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-text-secondary); margin-bottom: 2px;">
+                                <span>FREQUÊNCIA DE SINTONIA</span>
+                                <span id="val-seti-freq" style="font-weight: 700; color: var(--color-cyan);">1.000 GHz</span>
+                            </div>
+                            <input type="range" id="seti-freq-slider" min="1000" max="2000" value="1000" step="1" style="width: 100%; accent-color: var(--color-cyan); height: 4px; border-radius: 2px; background: rgba(0, 229, 255, 0.2); outline: none;" oninput="updateSetiFrequency(this.value)">
+                        </div>
+                        
+                        <!-- Decrypt read-out and button -->
+                        <div class="seti-decrypter-display" id="seti-decrypt-display" style="background: rgba(0, 229, 255, 0.02); border: 1px solid rgba(0, 229, 255, 0.1); padding: 8px; font-family: var(--font-mono); font-size: 0.65rem; min-height: 58px; line-height: 1.45; color: var(--color-text-secondary); border-radius: 2px; overflow: hidden; word-break: break-all; margin-bottom: 8px;">
+                            STATUS: RUÍDO CÓSMICO DE FUNDO... AJUSTE A FREQUÊNCIA PARA A LINHA DE HIDROGÊNIO (1.420 GHZ) PARA ENTRAR EM HANDSHAKE DE RECEPÇÃO.
+                        </div>
+                        <button class="phone-btn" id="btn-seti-decrypt" style="margin-top: 0; font-size: 0.72rem; padding: 8px 12px; display: none;" onclick="decryptSetiSignal()">
+                            <i class="fa-solid fa-key" style="margin-right: 6px;"></i> Decodificar Pacote de Dados
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Defesa Civil Emergency Alert Modal -->
+    <div id="defesa-civil-modal" class="emergency-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 4, 9, 0.85); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div class="emergency-modal-content emergency-blink predictive-modal" style="background: rgba(10, 10, 15, 0.96); border: 2px solid var(--color-red); width: 92%; max-width: 800px; padding: 24px; font-family: var(--font-mono); color: white; position: relative; box-shadow: 0 0 35px rgba(255, 23, 68, 0.35); border-radius: 4px; display: flex; flex-direction: column; gap: 16px;">
+            
+            <h2 style="font-size: 1.1rem; color: var(--color-red); border-bottom: 1px solid rgba(255, 23, 68, 0.4); padding-bottom: 8px; margin: 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; text-align: center;">
+                <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Centro de Simulação Climática & Análise Preditiva de Desastres (Defesa Civil SP)
+            </h2>
+            
+            <div class="modal-columns-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left;">
+                
+                <!-- Left Column: Sliders and Live Canvas Graph -->
+                <div style="display: flex; flex-direction: column; gap: 12px; border-right: 1px solid rgba(255, 255, 255, 0.08); padding-right: 20px;">
+                    <div style="font-size: 0.75rem; color: var(--color-cyan); font-weight: 700; text-transform: uppercase; border-bottom: 1px solid rgba(0, 229, 255, 0.15); padding-bottom: 4px;">
+                        Ajustes de Parâmetros Climáticos (Simulação)
+                    </div>
+                    
+                    <!-- Slider 1 -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--color-text-secondary); margin-bottom: 4px;">
+                            <span>Chuva Acumulada (24h)</span>
+                            <span id="val-sim-slider-rain" style="color: white; font-weight: 700;">50 mm</span>
+                        </div>
+                        <input type="range" id="sim-slider-rain" min="0" max="150" value="50" style="width: 100%; accent-color: var(--color-cyan);" oninput="updatePredictiveRisk()">
+                    </div>
+                    
+                    <!-- Slider 2 -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--color-text-secondary); margin-bottom: 4px;">
+                            <span>Umidade / Saturação do Solo</span>
+                            <span id="val-sim-slider-moisture" style="color: white; font-weight: 700;">40%</span>
+                        </div>
+                        <input type="range" id="sim-slider-moisture" min="0" max="100" value="40" style="width: 100%; accent-color: var(--color-cyan);" oninput="updatePredictiveRisk()">
+                    </div>
+                    
+                    <!-- Slider 3 -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--color-text-secondary); margin-bottom: 4px;">
+                            <span>Declividade da Encosta</span>
+                            <span id="val-sim-slider-slope" style="color: white; font-weight: 700;">25°</span>
+                        </div>
+                        <input type="range" id="sim-slider-slope" min="0" max="60" value="25" style="width: 100%; accent-color: var(--color-cyan);" oninput="updatePredictiveRisk()">
+                    </div>
+                    
+                    <!-- Slider 4 -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--color-text-secondary); margin-bottom: 4px;">
+                            <span>Impermeabilização do Solo</span>
+                            <span id="val-sim-slider-urban" style="color: white; font-weight: 700;">60%</span>
+                        </div>
+                        <input type="range" id="sim-slider-urban" min="0" max="100" value="60" style="width: 100%; accent-color: var(--color-cyan);" oninput="updatePredictiveRisk()">
+                    </div>
+
+                    <!-- Canvas Risk Chart -->
+                    <div style="margin-top: 4px;">
+                        <span style="font-size: 0.58rem; color: var(--color-text-secondary); display: block; margin-bottom: 4px;">PROJEÇÃO DO ÍNDICE DE RISCO ACUMULADO (PRÓXIMAS 6 HORAS)</span>
+                        <canvas id="sim-risk-canvas" style="width: 100%; height: 90px; background: rgba(2, 4, 9, 0.6); border: 1px solid var(--glass-border); display: block;"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Results & Action Trigger -->
+                <div style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="font-size: 0.75rem; color: var(--color-red); font-weight: 700; text-transform: uppercase; border-bottom: 1px solid rgba(255, 23, 68, 0.2); padding-bottom: 4px;">
+                            Diagnóstico e Risco IA Preditivo
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 2px;">
+                            <div style="font-size: 0.65rem; color: var(--color-text-secondary);">
+                                ÍNDICE DE RISCO CALCULADO:
+                                <div style="margin-top: 4px;">
+                                    <span id="sim-risk-badge" class="badge-lock warning" style="font-size: 0.6rem; padding: 2px 6px;">RISCO ATENÇÃO</span>
+                                </div>
+                            </div>
+                            <div id="sim-risk-percent" style="font-size: 2.8rem; font-weight: 800; color: var(--color-orange); line-height: 1; font-family: var(--font-mono);">
+                                48%
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(255, 23, 68, 0.04); border: 1px solid rgba(255, 23, 68, 0.2); padding: 12px; border-radius: 2px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--color-text-secondary); margin-bottom: 6px; font-weight: 700;">
+                                <span>ÓRGÃO: DEFESA CIVIL ESTADUAL (SP)</span>
+                                <span id="sim-risk-level-label">GRAU: ATENÇÃO (NÍVEL 2)</span>
+                            </div>
+                            <p id="emergency-modal-desc" style="font-size: 0.68rem; line-height: 1.4; color: white; margin: 0; min-height: 70px;">
+                                [SIMULAÇÃO] Precipitação acumulada e umidade do solo indicam estado de atenção. Monitoramento remoto ativo. Vias expressas podem sofrer acúmulos pontuais de água.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+                        <button onclick="triggerSirensSP()" id="btn-sim-sirens" class="phone-btn" style="background: var(--color-red); border-color: var(--color-red); color: white; margin: 0; font-size: 0.72rem; padding: 10px; width: 100%; font-weight: 700;" onmouseover="this.style.background='darkred'" onmouseout="this.style.background='var(--color-red)'">
+                            <i class="fa-solid fa-bullhorn" style="margin-right: 6px;"></i> Disparar Sirenes de Evasão Preventiva
+                        </button>
+                        <button onclick="closeEmergencyAlertSP()" class="phone-btn" style="background: transparent; border-color: rgba(255,255,255,0.15); color: var(--color-text-secondary); margin: 0; font-size: 0.68rem; padding: 8px; width: 100%;" onmouseover="this.style.borderColor='white'; this.style.color='white';" onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'; this.style.color='var(--color-text-secondary)';">
+                            Dispensar Alerta Operacional
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast elements -->
+    <div class="toast" id="system-toast">
+        <i class="fa-solid fa-circle-check toast-icon" id="toast-icon"></i>
+        <span class="toast-text" id="toast-text">Ação executada com sucesso!</span>
+    </div>
+
+    <!-- main logic -->
+    <script src="js/main.js"></script>
+</body>
+</html>
