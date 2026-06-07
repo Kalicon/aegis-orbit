@@ -18,9 +18,9 @@
 |---|---|
 | **563172** | Kalicon Amorim da Cruz Souza |
 
-**Curso:** Engenharia de Software — FIAP  
+**Curso:** ADS — FIAP  
 **Disciplina:** Global Solution 2026  
-**Turma:** 1ESPH
+
 
 ---
 
