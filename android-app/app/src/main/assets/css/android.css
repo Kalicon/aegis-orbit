@@ -507,3 +507,110 @@ section {
 :root {
     font-size: 14px;
 }
+
+/* ============================================================
+   SEÇÃO: ROTAS DE FUGA — Mobile Overrides
+   ============================================================ */
+
+/* Alert Banner: stack vertically on small screens */
+.escape-alert-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 12px !important;
+}
+
+.escape-panic-btn {
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+/* Grid: empilha mapa acima do painel lateral */
+.escape-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+}
+
+/* Mapa Leaflet: altura fixa e adequada para touch */
+#escape-map {
+    height: 300px !important;
+    min-height: 300px !important;
+}
+
+/* Leaflet zoom controls — bigger touch targets */
+.leaflet-control-zoom a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 1.2rem !important;
+}
+
+/* Map buttons: wrap and full width */
+.escape-map-controls {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+}
+
+.escape-map-btn {
+    font-size: 0.68rem !important;
+    padding: 10px 10px !important;
+    flex: 1 1 45% !important;
+    justify-content: center !important;
+    min-height: 40px !important;
+}
+
+/* Emergency contacts: 2x2 grid */
+.escape-contacts-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+}
+
+.escape-emergency-btn {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 10px 8px !important;
+    gap: 6px !important;
+    min-height: 70px !important;
+}
+
+.escape-emergency-btn i {
+    font-size: 1.4rem !important;
+}
+
+/* Google Maps button: full width */
+.escape-gmaps-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    font-size: 0.75rem !important;
+}
+
+/* Shelter list: compress padding */
+.escape-shelter-item {
+    padding: 10px 10px !important;
+    font-size: 0.7rem !important;
+}
+
+/* Status log: smaller font */
+.escape-status-log {
+    font-size: 0.62rem !important;
+}
+
+/* Risk badge: smaller */
+.escape-risk-badge {
+    font-size: 0.62rem !important;
+    padding: 3px 8px !important;
+}
+
+/* Nav emergency — bottom bar active state */
+.nav-link.nav-emergency.active {
+    background: rgba(255, 23, 68, 0.12) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.nav-link.nav-emergency.active i {
+    color: var(--color-red) !important;
+    text-shadow: 0 0 10px rgba(255, 23, 68, 0.6) !important;
+}

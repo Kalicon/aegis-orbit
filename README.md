@@ -10,6 +10,21 @@
   <em>Aplicativo Android Nativo + Dashboard Operacional Web (NASA EOS Partner)</em>
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/FIAP-Global%20Solution%202026-00e5ff?style=flat-square&logo=rocket" alt="FIAP GS 2026" />
+  <img src="https://img.shields.io/badge/Android-APK%20Ready-3DDC84?style=flat-square&logo=android" alt="Android APK" />
+  <img src="https://img.shields.io/badge/Web-Deploy%20Ready-0066cc?style=flat-square&logo=html5" alt="Web" />
+  <img src="https://img.shields.io/badge/ODS-9%20%7C%2011%20%7C%2013%20%7C%202%20%7C%208-00c853?style=flat-square" alt="ODS ONU" />
+</p>
+
+---
+
+## 📽️ Vídeo Pitch
+
+> **Assista à demonstração completa do projeto:**
+>
+> 🎬 **[Aegis-Orbit: Monitoramento Climático Inteligente Via Satélite | Projeto Acadêmico](https://youtu.be/5WBFzDZWN7Y)**
+
 ---
 
 ## 👨‍🚀 Equipe
@@ -18,7 +33,7 @@
 |---|---|
 | **563172** | Kalicon Amorim da Cruz Souza |
 
-**Curso:** Engenharia de Software — FIAP  
+**Curso:** Análise e Desenvolvimento de Sistemas — FIAP  
 **Disciplina:** Global Solution 2026  
 **Turma:** 1ESPH
 
@@ -29,9 +44,10 @@
 O **Aegis-Orbit** é um sistema integrado de monitoramento climático e aeroespacial que combina:
 
 - **Dashboard Operacional Web** estilo NASA Mission Control com dados em tempo real
-- **Aplicativo Android Nativo** (Kotlin + Jetpack Compose + WebView) com uplink satelital NTN
+- **Aplicativo Android Nativo** (Kotlin + Jetpack Compose + WebView) com suporte NTN
 - **APIs Reais Integradas**: NASA APOD, NASA NEO, ISS Tracker, SpaceX Launches, Open-Meteo, NOAA/SWPC
 - **Módulo SkyWatch (UAP/SETI)**: Scanner ionosférico para detecção de anomalias aéreas
+- **Sistema de Rotas de Fuga**: Mapa interativo (Leaflet.js + OpenStreetMap) com roteamento OSRM, abrigos e contatos de emergência
 - **Eco-Créditos verdes** verificados por análise multiespectral óptica via satélite
 
 ---
@@ -68,10 +84,20 @@ O **Aegis-Orbit** é um sistema integrado de monitoramento climático e aeroespa
 - **Decodificador SETI** com espectrograma de rádio animado
 - Painel de avistamentos comunitários
 
+### 🆘 Sistema de Rotas de Fuga (NOVO)
+- **Mapa interativo** Leaflet.js + OpenStreetMap centralizado em São Paulo
+- **8 pontos seguros mapeados**: HMLMB, Parque Trianon, Ibirapuera, Bombeiros, SAMU e outros
+- **Roteamento automático** via OSRM (sem chave de API)
+- **Geolocalização GPS** do dispositivo
+- **Seleção de tipo de catástrofe**: Enchente, Incêndio, Deslizamento, Sismo
+- **Contatos de emergência**: SAMU 192, Bombeiros 193, Defesa Civil 199, Polícia 190
+- **Integração Google Maps**: abre rota de fuga diretamente no Maps
+- **Link direto**: HMLMB — Hospital Maternidade Leonor Mendes de Barros
+
 ### Apresentação Acadêmica (7 slides)
 - Slides editáveis com dados do aluno
 - Exportação em Markdown
-- Slot para inserção do link YouTube do pitch
+- Link do pitch YouTube integrado: youtu.be/5WBFzDZWN7Y
 
 ### ODS Alinhamento
 - 5 Objetivos de Desenvolvimento Sustentável da ONU (9, 11, 13, 2, 8)
@@ -86,7 +112,7 @@ geopulse-ai/
 ├── css/
 │   └── style.css           # Design system completo (dark mode, glassmorphism)
 ├── js/
-│   └── main.js             # Toda a lógica: APIs, animações, interações
+│   └── main.js             # Toda a lógica: APIs, animações, interações, rotas de fuga
 ├── assets/
 │   ├── logo.png            # Logo Aegis-Orbit
 │   ├── background.png      # Background espacial
@@ -100,22 +126,22 @@ geopulse-ai/
         ├── build.gradle.kts
         ├── proguard-rules.pro
         └── src/main/
-            ├── AndroidManifest.xml
+            ├── AndroidManifest.xml   # Permissões: internet, localização, áudio
             ├── java/br/com/fiap/aegisorbit/
-            │   └── MainActivity.kt   # WebView + Edge-to-Edge + Permissões
+            │   └── MainActivity.kt   # WebView + Edge-to-Edge + GPS + Permissões
             ├── res/
             │   ├── values/
             │   │   ├── strings.xml
             │   │   └── themes.xml    # Tema escuro sem ActionBar
             │   └── drawable/
-            └── assets/               # Cópia idêntica do web app
-                ├── index.html
+            └── assets/               # Cópia sincronizada do web app
+                ├── index.html        # ← Sincronizado automaticamente
                 ├── css/
-                │   ├── style.css
-                │   └── android.css   # Override mobile do layout desktop
+                │   ├── style.css     # ← Sincronizado automaticamente
+                │   └── android.css   # Override mobile (layout responsivo)
                 ├── js/
-                │   └── main.js
-                └── assets/           # Imagens
+                │   └── main.js       # ← Sincronizado automaticamente
+                └── assets/           # Imagens e logos
 ```
 
 ---
@@ -123,21 +149,31 @@ geopulse-ai/
 ## 🚀 Como Usar
 
 ### Versão Web (Desktop)
-1. Abra `index.html` diretamente no navegador, ou
-2. Sirva com qualquer servidor HTTP local:
-   ```bash
-   cd geopulse-ai
-   python3 -m http.server 8080
-   # Acesse http://localhost:8080
-   ```
+```bash
+cd geopulse-ai
+python3 -m http.server 8080
+# Acesse http://localhost:8080
+```
 
-### Versão Android
-1. Abra a pasta `android-app/` no **Android Studio** (Arctic Fox ou superior)
-2. Sincronize o Gradle: `File → Sync Project with Gradle Files`
-3. Conecte um dispositivo Android (API 26+) ou crie um emulador
-4. Pressione **Run** (`Shift+F10`)
+### Versão Android — Build do APK
 
-> **Nota:** O app usa WebView para renderizar o mesmo HTML/CSS/JS da versão web, com CSS adicional (`android.css`) que adapta o layout para mobile.
+**Pré-requisitos:** Android Studio (ou SDK) instalado
+
+```bash
+# Método 1 — Via Android Studio
+# Abra android-app/ no Android Studio e pressione Run (Shift+F10)
+
+# Método 2 — Via linha de comando (Gradle Wrapper)
+cd geopulse-ai/android-app
+chmod +x gradlew
+./gradlew assembleDebug
+# APK gerado em: app/build/outputs/apk/debug/app-debug.apk
+
+# Instalar no dispositivo conectado via USB
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+> **Requisitos mínimos Android:** API 26+ (Android 8.0 Oreo)
 
 ---
 
@@ -150,9 +186,9 @@ geopulse-ai/
 | **NASA NEO** | Asteroides próximos da Terra | ✅ DEMO_KEY (inclusa) |
 | **Where the ISS at** | Posição real da ISS | ❌ Não |
 | **SpaceX r/SpaceX API** | Próximos lançamentos | ❌ Não |
-| **NOAA/SWPC** | Clima espacial (via proxy corrigido) | ❌ Não |
-| **OpenWeatherMap** | Dados extras (opcional) | ✅ Chave própria |
-| **WeatherAPI** | UV, fases da lua, alertas (opcional) | ✅ Chave própria |
+| **NOAA/SWPC** | Clima espacial | ❌ Não |
+| **OpenStreetMap + OSRM** | Mapa interativo e roteamento de fuga | ❌ Não |
+| **Web Geolocation API** | GPS do dispositivo para rotas de fuga | ❌ Não |
 
 ---
 
@@ -162,6 +198,9 @@ geopulse-ai/
 |---|---|
 | HTML5 + CSS3 | Estrutura e design do dashboard |
 | JavaScript (ES6+) | Toda a lógica de negócio e integrações |
+| Leaflet.js | Mapa interativo de rotas de fuga |
+| OpenStreetMap | Tiles de mapa (gratuito) |
+| OSRM | Roteamento inteligente de fuga |
 | CSS Custom Properties | Design system com variáveis de cor e tipografia |
 | SVG animado | Mapas, radares e visualizações |
 | Canvas 2D | Espectrograma SETI, fase da lua, gráfico de risco |
@@ -170,7 +209,7 @@ geopulse-ai/
 | Android WebView | Renderização do app web no dispositivo |
 | Room DB | (declarado para rotas offline futuras) |
 | FontAwesome 6 | Iconografia completa |
-| Google Fonts (Inter, Rajdhani, JetBrains Mono) | Tipografia NASA-style |
+| Google Fonts | Tipografia NASA-style (Inter, Rajdhani, JetBrains Mono) |
 
 ---
 
@@ -186,12 +225,8 @@ geopulse-ai/
 
 ---
 
-## 📽️ Vídeo Pitch
-
-> Insira o link do YouTube na seção **"Apresentação GS"** do dashboard.
-
----
-
 ## 📄 Licença
 
 Projeto acadêmico — FIAP Global Solution 2026. Todos os direitos reservados.
+
+© 2026 Kalicon Amorim da Cruz Souza — RM 563172

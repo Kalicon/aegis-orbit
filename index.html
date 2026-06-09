@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Leaflet.js for real interactive maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
     <meta name="description" content="Aegis-Orbit - Aplicativo Android nativo de inteligência climática e monitoramento aeroespacial de anomalias (UAPs/SETI). Trabalho acadêmico FIAP Global Solution.">
 </head>
 <body>
@@ -58,6 +60,12 @@
                     <a href="#" class="nav-link" id="nav-sdg" onclick="switchSection('sdg')">
                         <i class="fa-solid fa-leaf"></i>
                         <span>ODS Alinhamento</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link nav-emergency" id="nav-escape" onclick="switchSection('escape')">
+                        <i class="fa-solid fa-person-running"></i>
+                        <span>Rotas de Fuga</span>
                     </a>
                 </li>
             </nav>
@@ -623,6 +631,143 @@
             </div>
         </section>
 
+        <!-- Section: Escape Routes (Google Maps / Leaflet) -->
+        <section id="section-escape" class="hidden" style="flex-direction: column; gap: 24px;">
+
+            <!-- Emergency Alert Banner -->
+            <div id="escape-alert-banner" class="escape-alert-banner">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size:1.4rem; animation: pulse 1s infinite alternate;"></i>
+                    <div>
+                        <div style="font-weight:700; font-size:0.95rem; font-family:var(--font-mono);">SISTEMA DE ROTAS DE FUGA — AEGIS-ORBIT</div>
+                        <div id="escape-alert-text" style="font-size:0.75rem; opacity:0.85; font-family:var(--font-mono);">Selecione o tipo de catástrofe e pressione "Minha Localização" para calcular a rota mais segura.</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+                    <span id="escape-risk-badge" class="escape-risk-badge stable">SITUAÇÃO ESTÁVEL</span>
+                    <button onclick="triggerEmergencyProtocol()" class="escape-panic-btn" id="escape-panic-btn">
+                        <i class="fa-solid fa-bell"></i> PROTOCOLO DE EMERGÊNCIA
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Grid: Map + Controls -->
+            <div class="escape-grid">
+
+                <!-- LEFT: Leaflet Map -->
+                <div class="hud-panel" style="padding:0; overflow:hidden; display:flex; flex-direction:column; min-height:600px;">
+                    <div class="ops-header" style="padding:14px 18px; background:var(--bg-secondary);">
+                        <h3 class="ops-title" style="font-size:0.85rem;"><i class="fa-solid fa-map" style="color:var(--color-cyan); margin-right:8px;"></i>MAPA INTERATIVO — SÃO PAULO, SP</h3>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn-tab active" id="btne-flood" onclick="setDisasterLayer('flood')"><i class="fa-solid fa-droplet"></i> Enchente</button>
+                            <button class="btn-tab" id="btne-fire" onclick="setDisasterLayer('fire')"><i class="fa-solid fa-fire"></i> Incêndio</button>
+                            <button class="btn-tab" id="btne-landslide" onclick="setDisasterLayer('landslide')"><i class="fa-solid fa-mountain"></i> Deslizamento</button>
+                            <button class="btn-tab" id="btne-quake" onclick="setDisasterLayer('quake')"><i class="fa-solid fa-house-crack"></i> Sismo</button>
+                        </div>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div id="escape-leaflet-map" style="flex-grow:1; width:100%; min-height:480px; z-index:1;"></div>
+
+                    <!-- Map Bottom Controls -->
+                    <div style="padding:12px 18px; background:var(--bg-secondary); border-top:1px solid var(--glass-border); display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <button class="escape-map-btn" onclick="locateUserEscape()" id="btn-locate-me">
+                            <i class="fa-solid fa-location-crosshairs"></i> Minha Localização
+                        </button>
+                        <button class="escape-map-btn secondary" onclick="findNearestShelter()" id="btn-find-shelter">
+                            <i class="fa-solid fa-hospital"></i> Abrigo Mais Próximo
+                        </button>
+                        <button class="escape-map-btn secondary" onclick="toggleRiskZones()" id="btn-toggle-risk">
+                            <i class="fa-solid fa-shield-halved"></i> Zonas de Risco
+                        </button>
+                        <button class="escape-map-btn secondary" onclick="clearEscapeRoute()">
+                            <i class="fa-solid fa-broom"></i> Limpar Rota
+                        </button>
+                        <div id="escape-map-status" style="margin-left:auto; font-family:var(--font-mono); font-size:0.65rem; color:var(--color-text-muted);">Clique no mapa para definir origem manual</div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Control Panel -->
+                <div style="display:flex; flex-direction:column; gap:16px;">
+
+                    <!-- Route Info -->
+                    <div class="hud-panel" style="padding:18px;">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="box-title"><span><i class="fa-solid fa-route" style="color:var(--color-cyan); margin-right:6px;"></i>ROTA ATIVA</span></div>
+                        <div id="escape-route-info" style="margin-top:12px;">
+                            <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--color-text-muted); text-align:center; padding:20px 0;">
+                                <i class="fa-solid fa-location-crosshairs" style="font-size:1.5rem; color:var(--color-text-muted); display:block; margin-bottom:8px;"></i>
+                                Aguardando localização...<br>
+                                <span style="font-size:0.6rem;">Pressione "Minha Localização" para calcular rota automática</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nearest Shelters List -->
+                    <div class="hud-panel" style="padding:18px; flex-grow:1;">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="box-title">
+                            <span><i class="fa-solid fa-hospital" style="color:var(--color-emerald); margin-right:6px;"></i>ABRIGOS / PONTOS SEGUROS</span>
+                            <span id="shelter-count-badge" style="font-family:var(--font-mono); font-size:0.6rem; color:var(--color-emerald);">SP — 8 LOCAIS</span>
+                        </div>
+                        <div id="escape-shelters-list" style="margin-top:10px; display:flex; flex-direction:column; gap:6px; max-height:240px; overflow-y:auto;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Emergency Contacts -->
+                    <div class="hud-panel" style="padding:18px;">
+                        <div class="hud-corner-tr"></div>
+                        <div class="hud-corner-bl"></div>
+                        <div class="box-title" style="margin-bottom:12px;"><span><i class="fa-solid fa-phone-volume" style="color:var(--color-red); margin-right:6px;"></i>CONTATOS DE EMERGÊNCIA</span></div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                            <a href="tel:192" class="escape-emergency-btn samu">
+                                <i class="fa-solid fa-ambulance"></i>
+                                <div><strong>SAMU</strong><br><span>192</span></div>
+                            </a>
+                            <a href="tel:193" class="escape-emergency-btn fire">
+                                <i class="fa-solid fa-fire-extinguisher"></i>
+                                <div><strong>Bombeiros</strong><br><span>193</span></div>
+                            </a>
+                            <a href="tel:199" class="escape-emergency-btn civil">
+                                <i class="fa-solid fa-shield"></i>
+                                <div><strong>Defesa Civil</strong><br><span>199</span></div>
+                            </a>
+                            <a href="tel:190" class="escape-emergency-btn police">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <div><strong>Polícia</strong><br><span>190</span></div>
+                            </a>
+                        </div>
+                        <button id="btn-open-gmaps" onclick="openGoogleMapsRoute()" class="escape-gmaps-btn" style="margin-top:10px; width:100%;">
+                            <i class="fa-brands fa-google"></i>
+                            <span>Abrir Rota no Google Maps</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:auto; font-size:0.7rem;"></i>
+                        </button>
+                        <button onclick="openGoogleMapsHMLMB()" class="escape-gmaps-btn" style="margin-top:6px; width:100%; background:rgba(0,229,255,0.06); border-color:rgba(0,229,255,0.3); color:var(--color-cyan);">
+                            <i class="fa-solid fa-hospital"></i>
+                            <span>HMLMB — Hospital Maternidade</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:auto; font-size:0.7rem;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Real-time status -->
+                    <div class="hud-panel" style="padding:14px 18px;">
+                        <div class="box-title" style="margin-bottom:8px;"><span style="font-size:0.72rem;"><i class="fa-solid fa-tower-broadcast" style="color:var(--color-orange); margin-right:5px;"></i>STATUS OPERACIONAL</span></div>
+                        <div id="escape-status-log" style="font-family:var(--font-mono); font-size:0.65rem; color:var(--color-emerald); line-height:1.6; max-height:90px; overflow-y:auto;">
+                            <div>► Sistema de Rotas Aegis-Orbit iniciado</div>
+                            <div>► OpenStreetMap + Leaflet.js carregados</div>
+                            <div>► OSRM Routing Engine: disponível</div>
+                            <div>► 8 abrigos mapeados em São Paulo</div>
+                            <div style="color:var(--color-orange);">► Aguardando autorização de geolocalização</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
         <!-- Section 2: Special Purpose Aegis-Orbit -->
         <section id="section-purpose" class="purpose-grid hidden">
             <!-- Left Info Panel -->
@@ -1161,7 +1306,7 @@
                             </div>
                             <div class="video-mockup-text" id="video-link-label">Clique para Assistir no YouTube</div>
                         </div>
-                        <p style="font-size: 0.75rem; text-align: center; margin-top: 8px; color: var(--color-text-muted);" id="video-url-display">URL do Vídeo: Indefinida. Insira ao lado.</p>
+                        <p style="font-size: 0.75rem; text-align: center; margin-top: 8px; color: var(--color-text-muted);" id="video-url-display">🎬 youtu.be/5WBFzDZWN7Y</p>
                     </div>
                 </div>
 
@@ -1191,7 +1336,7 @@
 
                     <div class="form-group" style="margin-bottom: 12px; border-top: 1px solid var(--glass-border); padding-top: 12px;">
                         <label><i class="fa-brands fa-youtube" style="color: #ff1744;"></i> Link do Pitch (YouTube)</label>
-                        <input type="text" class="form-input" id="input-youtube" placeholder="https://www.youtube.com/watch?v=..." oninput="updatePresentationData()">
+                        <input type="text" class="form-input" id="input-youtube" value="https://youtu.be/5WBFzDZWN7Y" oninput="updatePresentationData()">
                     </div>
                 </div>
 
@@ -1561,6 +1706,8 @@
         <span class="toast-text" id="toast-text">Ação executada com sucesso!</span>
     </div>
 
+    <!-- Leaflet.js for real interactive maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- main logic -->
     <script src="js/main.js"></script>
 </body>

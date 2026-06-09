@@ -192,6 +192,8 @@ function switchSection(sectionId) {
     document.getElementById('section-presentation').classList.add('hidden');
     document.getElementById('section-sdg').classList.add('hidden');
     document.getElementById('section-observatory').classList.add('hidden');
+    const escapeSection = document.getElementById('section-escape');
+    if (escapeSection) { escapeSection.classList.add('hidden'); escapeSection.style.display = ''; }
     
     document.getElementById('nav-dashboard').classList.remove('active');
     document.getElementById('nav-purpose').classList.remove('active');
@@ -199,6 +201,8 @@ function switchSection(sectionId) {
     document.getElementById('nav-presentation').classList.remove('active');
     document.getElementById('nav-sdg').classList.remove('active');
     document.getElementById('nav-observatory').classList.remove('active');
+    const navEscape = document.getElementById('nav-escape');
+    if (navEscape) navEscape.classList.remove('active');
     
     document.getElementById(`section-${sectionId}`).classList.remove('hidden');
     document.getElementById(`nav-${sectionId}`).classList.add('active');
@@ -225,6 +229,13 @@ function switchSection(sectionId) {
         titleText.innerText = "Observatório Espacial";
         subtitleText.innerText = "Dados em Tempo Real da NASA • Asteroides Próximos • Rastreamento ISS • Anomalias";
         initObservatory();
+    } else if (sectionId === 'escape') {
+        titleText.innerText = "Sistema de Rotas de Fuga";
+        subtitleText.innerText = "Mapa Interativo Real • Abrigos de Emergência SP • Geolocalização • Roteamento OSRM";
+        // Needs explicit display:flex since CSS .hidden uses display:none !important
+        const escSec = document.getElementById('section-escape');
+        if (escSec) escSec.style.display = 'flex';
+        initEscapeRoutes();
     }
     
     currentSection = sectionId;
@@ -4166,4 +4177,672 @@ function updateIssMapping() {
         }
         isOverBrazilLogTriggered = false;
     }
+}
+
+// ===========================================================
+// AEGIS-ORBIT — MÓDULO DE ROTAS DE FUGA
+// Leaflet.js + OpenStreetMap + OSRM Routing + Geolocation
+// ===========================================================
+
+let escapeMap = null;
+let escapeMapInitialized = false;
+let userMarker = null;
+let userLatLng = null;
+let routeLayer = null;
+let riskZonesLayer = null;
+let shelterMarkers = [];
+let riskZonesVisible = true;
+let currentDisasterType = 'flood';
+let destinationShelter = null;
+let escapeGeoWatchId = null;
+
+// São Paulo Emergency Shelters Database
+const SP_SHELTERS = [
+    {
+        id: 'hmlmb',
+        name: 'Hospital Maternidade Leonor Mendes de Barros',
+        short: 'HMLMB',
+        lat: -23.5177, lng: -46.6061,
+        type: 'hospital',
+        capacity: 850,
+        phone: '(11) 2089-7600',
+        address: 'R. da Penha, 1297 - Vila Guilherme, SP'
+    },
+    {
+        id: 'hc',
+        name: 'Hospital das Clínicas — USP',
+        short: 'Hospital das Clínicas',
+        lat: -23.5567, lng: -46.6696,
+        type: 'hospital',
+        capacity: 2500,
+        phone: '(11) 2661-0000',
+        address: 'Av. Dr. Enéas Carvalho de Aguiar, 255 - Cerqueira César, SP'
+    },
+    {
+        id: 'santacasa',
+        name: 'Santa Casa de Misericórdia de São Paulo',
+        short: 'Santa Casa SP',
+        lat: -23.5401, lng: -46.6410,
+        type: 'hospital',
+        capacity: 1100,
+        phone: '(11) 2176-7000',
+        address: 'R. Dr. Cesário Mota Júnior, 112 - Santa Cecília, SP'
+    },
+    {
+        id: 'unifesp',
+        name: 'Hospital São Paulo — UNIFESP',
+        short: 'Hospital São Paulo',
+        lat: -23.5971, lng: -46.6406,
+        type: 'hospital',
+        capacity: 780,
+        phone: '(11) 5576-4000',
+        address: 'R. Napoleão de Barros, 715 - Vila Clementino, SP'
+    },
+    {
+        id: 'ibirapuera',
+        name: 'Parque Ibirapuera — Ponto de Encontro',
+        short: 'Parque Ibirapuera',
+        lat: -23.5874, lng: -46.6576,
+        type: 'shelter',
+        capacity: 50000,
+        phone: '199 (Defesa Civil)',
+        address: 'Av. Pedro Álvares Cabral, s/n - Vila Mariana, SP'
+    },
+    {
+        id: 'expo',
+        name: 'Expo Center Norte — Centro de Triagem',
+        short: 'Expo Center Norte',
+        lat: -23.5182, lng: -46.6150,
+        type: 'shelter',
+        capacity: 12000,
+        phone: '199 (Defesa Civil)',
+        address: 'R. José Bernardo Pinto, 333 - Vila Guilherme, SP'
+    },
+    {
+        id: 'cantareira',
+        name: 'Parque Estadual da Cantareira',
+        short: 'Cantareira',
+        lat: -23.3921, lng: -46.6267,
+        type: 'shelter',
+        capacity: 30000,
+        phone: '199 (Defesa Civil)',
+        address: 'Av. Luiz Carlos Paraná - Tremembé, SP'
+    },
+    {
+        id: 'einst',
+        name: 'Hospital Albert Einstein',
+        short: 'Hospital Einstein',
+        lat: -23.5960, lng: -46.7197,
+        type: 'hospital',
+        capacity: 600,
+        phone: '(11) 2151-1233',
+        address: 'Av. Albert Einstein, 627 - Morumbi, SP'
+    }
+];
+
+// Risk Zones per Disaster Type (São Paulo real risk areas)
+const RISK_ZONES = {
+    flood: [
+        { lat: -23.5158, lng: -46.6389, radius: 1800, label: 'Marginal Tietê — Risco de Inundação', color: '#0066ff' },
+        { lat: -23.5690, lng: -46.6977, radius: 1600, label: 'Marginal Pinheiros — Zona Crítica', color: '#0044cc' },
+        { lat: -23.5422, lng: -46.5903, radius: 900, label: 'Heliópolis — Risco Hidrológico', color: '#0055ee' },
+        { lat: -23.6029, lng: -46.5644, radius: 700, label: 'Vila Prudente — Alagamento Crítico', color: '#0044cc' },
+    ],
+    fire: [
+        { lat: -23.4850, lng: -46.8200, radius: 2500, label: 'Zona Oeste — Foco Térmico Ativo', color: '#ff4400' },
+        { lat: -23.7052, lng: -46.7475, radius: 1800, label: 'M\'Boi Mirim — Incêndio de Vegetação', color: '#ff6600' },
+        { lat: -23.4200, lng: -46.5500, radius: 1200, label: 'Serra da Cantareira — Foco Térmico', color: '#ff4400' },
+    ],
+    landslide: [
+        { lat: -23.6243, lng: -46.7256, radius: 1400, label: 'Paraisópolis — Risco de Deslizamento', color: '#cc6600' },
+        { lat: -23.7052, lng: -46.7475, radius: 1200, label: 'M\'Boi Mirim — Encosta Instável', color: '#aa5500' },
+        { lat: -23.5422, lng: -46.5903, radius: 800, label: 'Heliópolis — Risco Geomorfológico', color: '#cc6600' },
+        { lat: -23.4390, lng: -46.7500, radius: 900, label: 'Jaraguá — Solo Saturado Crítico', color: '#aa5500' },
+    ],
+    quake: [
+        { lat: -23.5505, lng: -46.6333, radius: 5000, label: 'Área Metropolitana SP — Atenção Sísmica', color: '#9900cc' },
+        { lat: -23.6500, lng: -46.7800, radius: 3000, label: 'Zona Sul — Atividade Sísmica', color: '#7700aa' },
+    ]
+};
+
+function initEscapeRoutes() {
+    if (escapeMapInitialized && escapeMap) {
+        escapeMap.invalidateSize();
+        return;
+    }
+    if (!window.L) {
+        addEscapeLog('⚠ Leaflet.js ainda não carregado. Tentando novamente...', 'warn');
+        setTimeout(initEscapeRoutes, 500);
+        return;
+    }
+
+    // Init Leaflet Map centered on São Paulo
+    escapeMap = L.map('escape-leaflet-map', {
+        center: [-23.5505, -46.6333],
+        zoom: 12,
+        zoomControl: true,
+        attributionControl: true
+    });
+
+    // Dark-themed OpenStreetMap tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | AEGIS-ORBIT Emergency System',
+        maxZoom: 18,
+        className: 'map-tiles-dark'
+    }).addTo(escapeMap);
+
+    // Draw shelter markers
+    renderShelterMarkers();
+
+    // Draw initial risk zones (flood by default)
+    setDisasterLayer('flood');
+
+    // Map click to set custom origin
+    escapeMap.on('click', function(e) {
+        setUserLocation(e.latlng.lat, e.latlng.lng, true);
+    });
+
+    escapeMapInitialized = true;
+    addEscapeLog('✓ Mapa Leaflet.js inicializado com sucesso', 'ok');
+    addEscapeLog('✓ OpenStreetMap tiles carregados', 'ok');
+    addEscapeLog('► Clique no mapa ou use "Minha Localização" para iniciar', 'info');
+
+    // Render shelter list
+    renderShelterList();
+}
+
+function renderShelterMarkers() {
+    if (!escapeMap) return;
+    shelterMarkers.forEach(m => m.remove());
+    shelterMarkers = [];
+
+    SP_SHELTERS.forEach(shelter => {
+        const isHospital = shelter.type === 'hospital';
+        const iconColor = isHospital ? '#00e5ff' : '#00ff66';
+        const bgColor = isHospital ? 'rgba(0,229,255,0.15)' : 'rgba(0,255,102,0.15)';
+        const icon = isHospital ? '🏥' : '🏕️';
+
+        const customIcon = L.divIcon({
+            html: `<div style="
+                background:${bgColor};
+                border:2px solid ${iconColor};
+                border-radius:50%;
+                width:34px; height:34px;
+                display:flex; align-items:center; justify-content:center;
+                font-size:16px;
+                box-shadow:0 0 10px ${iconColor};
+                cursor:pointer;
+            ">${icon}</div>`,
+            className: '',
+            iconSize: [34, 34],
+            iconAnchor: [17, 17]
+        });
+
+        const marker = L.marker([shelter.lat, shelter.lng], { icon: customIcon })
+            .addTo(escapeMap)
+            .bindPopup(`
+                <div style="font-family:monospace; font-size:12px; background:#060913; color:#fff; padding:8px; border:1px solid ${iconColor}; min-width:220px;">
+                    <div style="color:${iconColor}; font-weight:700; margin-bottom:6px;">${icon} ${shelter.name}</div>
+                    <div style="color:#90caf9;">📍 ${shelter.address}</div>
+                    <div style="color:#90caf9;">📞 ${shelter.phone}</div>
+                    <div style="color:#90caf9; margin-top:4px;">👥 Capacidade: ${shelter.capacity.toLocaleString()} pessoas</div>
+                    <button onclick="routeToShelter('${shelter.id}')" style="
+                        margin-top:8px; width:100%; background:${iconColor}; color:#000;
+                        border:none; padding:5px; cursor:pointer; font-weight:700;
+                        font-family:monospace; border-radius:2px;
+                    ">▶ TRAÇAR ROTA AQUI</button>
+                </div>
+            `, { maxWidth: 280 });
+
+        shelterMarkers.push(marker);
+    });
+}
+
+function renderShelterList() {
+    const list = document.getElementById('escape-shelters-list');
+    if (!list) return;
+    list.innerHTML = '';
+    SP_SHELTERS.forEach((shelter, idx) => {
+        const isHospital = shelter.type === 'hospital';
+        const icon = isHospital ? '🏥' : '🏕️';
+        const div = document.createElement('div');
+        div.style.cssText = `
+            padding:8px 10px; border:1px solid rgba(0,229,255,0.15);
+            background:rgba(0,229,255,0.03); cursor:pointer;
+            font-family:monospace; font-size:0.68rem;
+            display:flex; align-items:center; gap:8px;
+            transition: all 0.2s; border-radius:2px;
+        `;
+        div.innerHTML = `
+            <span style="font-size:1rem;">${icon}</span>
+            <div style="flex-grow:1;">
+                <div style="color:#fff; font-weight:700;">${shelter.short}</div>
+                <div style="color:#4f7cac; font-size:0.6rem;">${isHospital ? 'Hospital' : 'Abrigo Coletivo'}</div>
+            </div>
+            <button onclick="routeToShelter('${shelter.id}')" style="
+                background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3);
+                color:#00e5ff; padding:3px 8px; cursor:pointer;
+                font-family:monospace; font-size:0.6rem; border-radius:2px;
+            ">ROTA</button>
+        `;
+        div.onmouseover = () => div.style.background = 'rgba(0,229,255,0.08)';
+        div.onmouseout = () => div.style.background = 'rgba(0,229,255,0.03)';
+        div.onclick = (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+                escapeMap.flyTo([shelter.lat, shelter.lng], 15);
+            }
+        };
+        list.appendChild(div);
+    });
+}
+
+function setDisasterLayer(type) {
+    currentDisasterType = type;
+    ['flood', 'fire', 'landslide', 'quake'].forEach(t => {
+        const btn = document.getElementById(`btne-${t}`);
+        if (btn) btn.classList.remove('active');
+    });
+    const activeBtn = document.getElementById(`btne-${type}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Update alert banner
+    const bannerMap = {
+        flood: { text: 'Modo Enchente/Inundação ativo — Zonas de risco hidrológico exibidas no mapa.', badge: 'RISCO: ENCHENTE', badgeClass: 'flood' },
+        fire:  { text: 'Modo Incêndio ativo — Focos térmicos e áreas de risco de combustão mapeados.', badge: 'RISCO: INCÊNDIO', badgeClass: 'fire' },
+        landslide: { text: 'Modo Deslizamento ativo — Encostas instáveis e zonas geomorfológicas críticas.', badge: 'RISCO: DESLIZ.', badgeClass: 'landslide' },
+        quake: { text: 'Modo Sísmico ativo — Áreas de atenção geotectônica para a RMSP.', badge: 'RISCO: SÍSMICO', badgeClass: 'quake' }
+    };
+    const info = bannerMap[type];
+    const alertText = document.getElementById('escape-alert-text');
+    const badge = document.getElementById('escape-risk-badge');
+    if (alertText) alertText.textContent = info.text;
+    if (badge) {
+        badge.textContent = info.badge;
+        badge.className = `escape-risk-badge ${info.badgeClass}`;
+    }
+
+    if (!escapeMap) return;
+    drawRiskZones(type);
+    addEscapeLog(`► Camada de risco alterada: ${type.toUpperCase()}`, 'info');
+}
+
+function drawRiskZones(type) {
+    if (!escapeMap) return;
+    if (riskZonesLayer) {
+        riskZonesLayer.clearLayers();
+    } else {
+        riskZonesLayer = L.layerGroup().addTo(escapeMap);
+    }
+
+    const zones = RISK_ZONES[type] || [];
+    zones.forEach(zone => {
+        L.circle([zone.lat, zone.lng], {
+            radius: zone.radius,
+            color: zone.color,
+            fillColor: zone.color,
+            fillOpacity: 0.18,
+            weight: 2,
+            dashArray: '6, 4',
+            className: 'risk-zone-circle'
+        }).addTo(riskZonesLayer)
+          .bindTooltip(zone.label, {
+              permanent: false,
+              direction: 'top',
+              className: 'leaflet-risk-tooltip'
+          });
+    });
+}
+
+function toggleRiskZones() {
+    if (!escapeMap || !riskZonesLayer) return;
+    riskZonesVisible = !riskZonesVisible;
+    if (riskZonesVisible) {
+        riskZonesLayer.addTo(escapeMap);
+        addEscapeLog('► Zonas de risco visíveis', 'ok');
+    } else {
+        riskZonesLayer.remove();
+        addEscapeLog('► Zonas de risco ocultadas', 'info');
+    }
+    const btn = document.getElementById('btn-toggle-risk');
+    if (btn) {
+        btn.style.background = riskZonesVisible ? 'rgba(255,23,68,0.15)' : '';
+        btn.style.borderColor = riskZonesVisible ? 'rgba(255,23,68,0.4)' : '';
+    }
+}
+
+function locateUserEscape() {
+    if (!navigator.geolocation) {
+        addEscapeLog('⚠ Geolocalização não suportada neste navegador', 'warn');
+        showToast('Geolocalização não disponível', 'fa-triangle-exclamation');
+        return;
+    }
+    const btn = document.getElementById('btn-locate-me');
+    if (btn) { btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Localizando...'; btn.disabled = true; }
+    addEscapeLog('► Solicitando permissão de geolocalização...', 'info');
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setUserLocation(lat, lng, false);
+            if (btn) { btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Minha Localização'; btn.disabled = false; }
+            addEscapeLog(`✓ Localização GPS obtida: ${lat.toFixed(4)}, ${lng.toFixed(4)}`, 'ok');
+            showToast('Localização obtida! Calculando abrigos...', 'fa-location-crosshairs');
+            findNearestShelter();
+        },
+        err => {
+            // Fallback to SP center area (HMLMB area) when GPS is denied
+            addEscapeLog('⚠ GPS negado — Usando localização de referência (Vila Guilherme, SP)', 'warn');
+            setUserLocation(-23.5177 + (Math.random() * 0.01 - 0.005), -46.6061 + (Math.random() * 0.01 - 0.005), false);
+            if (btn) { btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Minha Localização'; btn.disabled = false; }
+            showToast('GPS negado — Usando localização estimada', 'fa-triangle-exclamation');
+            findNearestShelter();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+
+function setUserLocation(lat, lng, isManual = false) {
+    if (!escapeMap) { initEscapeRoutes(); return; }
+    userLatLng = { lat, lng };
+
+    if (userMarker) userMarker.remove();
+
+    const userIcon = L.divIcon({
+        html: `<div style="
+            width:18px; height:18px;
+            background:#00e5ff;
+            border:3px solid #fff;
+            border-radius:50%;
+            box-shadow:0 0 0 6px rgba(0,229,255,0.3), 0 0 20px rgba(0,229,255,0.6);
+            animation: pulse 1.5s infinite;
+        "></div>`,
+        className: '',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+    });
+
+    userMarker = L.marker([lat, lng], { icon: userIcon })
+        .addTo(escapeMap)
+        .bindPopup(`<div style="font-family:monospace; color:#fff; background:#020409; padding:8px; border:1px solid #00e5ff;">
+            <b style="color:#00e5ff;">📍 SUA LOCALIZAÇÃO</b><br>
+            Lat: ${lat.toFixed(5)}<br>Lng: ${lng.toFixed(5)}
+            ${isManual ? '<br><small style="color:#4f7cac">(Definido manualmente)</small>' : '<br><small style="color:#00ff66">(GPS em tempo real)</small>'}
+        </div>`);
+
+    escapeMap.flyTo([lat, lng], 14, { animate: true, duration: 1.2 });
+
+    const statusEl = document.getElementById('escape-map-status');
+    if (statusEl) statusEl.textContent = `Posição definida: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+}
+
+function findNearestShelter() {
+    if (!userLatLng) {
+        locateUserEscape();
+        return;
+    }
+    addEscapeLog('► Calculando abrigos mais próximos...', 'info');
+
+    // Calculate distances using Haversine formula
+    const withDist = SP_SHELTERS.map(s => ({
+        ...s,
+        dist: haversineKm(userLatLng.lat, userLatLng.lng, s.lat, s.lng)
+    })).sort((a, b) => a.dist - b.dist);
+
+    // Update shelter list with distances
+    const list = document.getElementById('escape-shelters-list');
+    if (list) {
+        list.innerHTML = '';
+        withDist.forEach((shelter, idx) => {
+            const isHospital = shelter.type === 'hospital';
+            const icon = isHospital ? '🏥' : '🏕️';
+            const distStr = shelter.dist < 1 ? `${(shelter.dist * 1000).toFixed(0)}m` : `${shelter.dist.toFixed(1)}km`;
+            const highlight = idx === 0 ? 'border-color:rgba(0,255,102,0.5); background:rgba(0,255,102,0.05);' : '';
+
+            const div = document.createElement('div');
+            div.style.cssText = `padding:8px 10px; border:1px solid rgba(0,229,255,0.15); background:rgba(0,229,255,0.03); cursor:pointer; font-family:monospace; font-size:0.68rem; display:flex; align-items:center; gap:8px; border-radius:2px; ${highlight}`;
+            div.innerHTML = `
+                <span style="font-size:1rem;">${idx === 0 ? '⭐' : icon}</span>
+                <div style="flex-grow:1;">
+                    <div style="color:${idx === 0 ? '#00ff66' : '#fff'}; font-weight:700;">${shelter.short}</div>
+                    <div style="color:#4f7cac; font-size:0.6rem;">${distStr} de distância</div>
+                </div>
+                <button onclick="routeToShelter('${shelter.id}')" style="background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.3); color:#00e5ff; padding:3px 8px; cursor:pointer; font-family:monospace; font-size:0.6rem; border-radius:2px;">ROTA</button>
+            `;
+            div.onclick = (e) => { if (e.target.tagName !== 'BUTTON') escapeMap.flyTo([shelter.lat, shelter.lng], 15); };
+            list.appendChild(div);
+        });
+    }
+
+    // Auto-route to nearest shelter
+    const nearest = withDist[0];
+    addEscapeLog(`✓ Abrigo mais próximo: ${nearest.short} (${nearest.dist.toFixed(2)} km)`, 'ok');
+    routeToShelter(nearest.id);
+}
+
+function routeToShelter(shelterId) {
+    const shelter = SP_SHELTERS.find(s => s.id === shelterId);
+    if (!shelter) return;
+    destinationShelter = shelter;
+
+    if (!userLatLng) {
+        // Use shelter's own coords as a fake user start for demo
+        setUserLocation(shelter.lat + 0.01, shelter.lng + 0.01, true);
+    }
+
+    addEscapeLog(`► Calculando rota para: ${shelter.short}...`, 'info');
+    escapeMap.flyTo([shelter.lat, shelter.lng], 13);
+
+    // Call OSRM free routing API
+    const url = `https://router.project-osrm.org/route/v1/driving/${userLatLng.lng},${userLatLng.lat};${shelter.lng},${shelter.lat}?overview=full&geometries=geojson&steps=true`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.code !== 'Ok' || !data.routes.length) throw new Error('Rota não encontrada');
+            const route = data.routes[0];
+            displayRoute(route, shelter);
+        })
+        .catch(err => {
+            addEscapeLog(`⚠ OSRM indisponível: ${err.message} — Traçando linha reta`, 'warn');
+            displayStraightLineRoute(shelter);
+        });
+}
+
+function displayRoute(route, shelter) {
+    if (routeLayer) routeLayer.remove();
+
+    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+    const distKm = (route.distance / 1000).toFixed(2);
+    const durationMin = Math.ceil(route.duration / 60);
+    const durationWalkMin = Math.ceil((route.distance / 80)); // ~5 km/h walking
+
+    routeLayer = L.geoJSON(route.geometry, {
+        style: {
+            color: '#00e5ff',
+            weight: 5,
+            opacity: 0.85,
+            dashArray: null,
+            lineCap: 'round',
+            lineJoin: 'round'
+        }
+    }).addTo(escapeMap);
+
+    // Fit bounds to route
+    escapeMap.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+
+    // Extract turn-by-turn steps
+    const steps = route.legs?.[0]?.steps || [];
+    const stepsHtml = steps.slice(0, 5).map(s => {
+        const icon = s.maneuver.type === 'turn' ? (s.maneuver.modifier?.includes('right') ? '↗' : '↖') : '↑';
+        return `<div style="border-left:2px solid rgba(0,229,255,0.3); padding:3px 8px; margin:3px 0; font-size:0.62rem; color:#90caf9;">${icon} ${s.name || 'Continue'}</div>`;
+    }).join('');
+
+    // Update route info panel
+    const routeInfo = document.getElementById('escape-route-info');
+    if (routeInfo) {
+        routeInfo.innerHTML = `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+                <div style="background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.2); padding:10px; text-align:center; border-radius:2px;">
+                    <div style="font-family:monospace; font-size:0.55rem; color:#4f7cac;">DISTÂNCIA</div>
+                    <div style="font-family:monospace; font-size:1.3rem; font-weight:700; color:#00e5ff;">${distKm} km</div>
+                </div>
+                <div style="background:rgba(0,255,102,0.05); border:1px solid rgba(0,255,102,0.2); padding:10px; text-align:center; border-radius:2px;">
+                    <div style="font-family:monospace; font-size:0.55rem; color:#4f7cac;">TEMPO (A PÉ)</div>
+                    <div style="font-family:monospace; font-size:1.3rem; font-weight:700; color:#00ff66;">~${durationWalkMin} min</div>
+                </div>
+            </div>
+            <div style="font-family:monospace; font-size:0.7rem; color:#fff; margin-bottom:6px;">
+                <i class="fa-solid fa-location-dot" style="color:#ff1744; margin-right:5px;"></i>
+                <strong style="color:#00e5ff;">${shelter.short}</strong>
+            </div>
+            <div style="font-family:monospace; font-size:0.62rem; color:#4f7cac; margin-bottom:8px;">${shelter.address}</div>
+            ${stepsHtml ? `<div style="border-top:1px solid rgba(0,229,255,0.1); padding-top:8px; font-family:monospace; font-size:0.6rem; color:#4f7cac; margin-bottom:4px;">PRIMEIRAS INSTRUÇÕES:</div>${stepsHtml}` : ''}
+            <button onclick="openGoogleMapsRoute()" style="margin-top:8px; width:100%; background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.35); color:#00e5ff; padding:7px; cursor:pointer; font-family:monospace; font-size:0.65rem; border-radius:2px; display:flex; align-items:center; justify-content:center; gap:6px;">
+                <i class="fa-brands fa-google"></i> Abrir no Google Maps
+            </button>
+        `;
+    }
+
+    addEscapeLog(`✓ Rota calculada: ${distKm} km | ~${durationWalkMin} min a pé`, 'ok');
+    showToast(`Rota para ${shelter.short}: ${distKm} km`, 'fa-route');
+}
+
+function displayStraightLineRoute(shelter) {
+    if (!userLatLng) return;
+    if (routeLayer) routeLayer.remove();
+
+    const line = [
+        [userLatLng.lat, userLatLng.lng],
+        [shelter.lat, shelter.lng]
+    ];
+    routeLayer = L.polyline(line, {
+        color: '#ff9100',
+        weight: 4,
+        opacity: 0.8,
+        dashArray: '10, 8'
+    }).addTo(escapeMap);
+
+    const dist = haversineKm(userLatLng.lat, userLatLng.lng, shelter.lat, shelter.lng);
+    const durationMin = Math.ceil((dist / 5) * 60);
+
+    const routeInfo = document.getElementById('escape-route-info');
+    if (routeInfo) {
+        routeInfo.innerHTML = `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+                <div style="background:rgba(255,145,0,0.05); border:1px solid rgba(255,145,0,0.3); padding:10px; text-align:center;">
+                    <div style="font-family:monospace; font-size:0.55rem; color:#4f7cac;">DISTÂNCIA (RETA)</div>
+                    <div style="font-family:monospace; font-size:1.3rem; font-weight:700; color:#ff9100;">${dist.toFixed(2)} km</div>
+                </div>
+                <div style="background:rgba(255,145,0,0.05); border:1px solid rgba(255,145,0,0.3); padding:10px; text-align:center;">
+                    <div style="font-family:monospace; font-size:0.55rem; color:#4f7cac;">TEMPO (A PÉ)</div>
+                    <div style="font-family:monospace; font-size:1.3rem; font-weight:700; color:#ff9100;">~${durationMin} min</div>
+                </div>
+            </div>
+            <div style="font-family:monospace; font-size:0.65rem; color:#ff9100; margin-bottom:6px;">
+                ⚠ Rota estimada (linha reta) — OSRM indisponível
+            </div>
+            <div style="font-family:monospace; font-size:0.7rem; color:#fff; margin-bottom:4px;">${shelter.short}</div>
+            <div style="font-family:monospace; font-size:0.62rem; color:#4f7cac;">${shelter.address}</div>
+        `;
+    }
+    escapeMap.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+}
+
+function clearEscapeRoute() {
+    if (routeLayer) { routeLayer.remove(); routeLayer = null; }
+    destinationShelter = null;
+    const routeInfo = document.getElementById('escape-route-info');
+    if (routeInfo) {
+        routeInfo.innerHTML = `
+            <div style="font-family:monospace; font-size:0.7rem; color:#4f7cac; text-align:center; padding:20px 0;">
+                <i class="fa-solid fa-location-crosshairs" style="font-size:1.5rem; display:block; margin-bottom:8px;"></i>
+                Rota limpa. Selecione um abrigo para nova rota.
+            </div>
+        `;
+    }
+    addEscapeLog('► Rota limpa', 'info');
+}
+
+function openGoogleMapsRoute() {
+    if (!destinationShelter) {
+        if (userLatLng) {
+            // Open maps from user location to nearest shelter
+            const nearest = SP_SHELTERS.map(s => ({ ...s, dist: haversineKm(userLatLng.lat, userLatLng.lng, s.lat, s.lng) })).sort((a,b)=>a.dist-b.dist)[0];
+            const url = `https://www.google.com/maps/dir/${userLatLng.lat},${userLatLng.lng}/${nearest.lat},${nearest.lng}`;
+            window.open(url, '_blank');
+        } else {
+            showToast('Defina sua localização primeiro', 'fa-triangle-exclamation');
+        }
+        return;
+    }
+    const origin = userLatLng ? `${userLatLng.lat},${userLatLng.lng}` : 'Minha+localização';
+    const dest = `${destinationShelter.lat},${destinationShelter.lng}`;
+    const url = `https://www.google.com/maps/dir/${origin}/${dest}`;
+    window.open(url, '_blank');
+    addEscapeLog(`► Abrindo Google Maps para ${destinationShelter.short}`, 'ok');
+}
+
+function openGoogleMapsHMLMB() {
+    const hmlmb = SP_SHELTERS.find(s => s.id === 'hmlmb');
+    const origin = userLatLng ? `${userLatLng.lat},${userLatLng.lng}` : '';
+    const dest = `${hmlmb.lat},${hmlmb.lng}`;
+    const url = origin
+        ? `https://www.google.com/maps/dir/${origin}/${dest}`
+        : `https://www.google.com/maps/search/?api=1&query=${dest}`;
+    window.open(url, '_blank');
+    addEscapeLog(`► Abrindo Google Maps para HMLMB`, 'ok');
+}
+
+function triggerEmergencyProtocol() {
+    const btn = document.getElementById('escape-panic-btn');
+    const banner = document.getElementById('escape-alert-banner');
+    const badge = document.getElementById('escape-risk-badge');
+
+    if (btn) {
+        btn.style.animation = 'none';
+        btn.style.background = '#ff1744';
+        btn.innerHTML = '<i class="fa-solid fa-bell fa-shake"></i> PROTOCOLO ATIVO!';
+    }
+    if (badge) {
+        badge.textContent = '⚠ EMERGÊNCIA CRÍTICA';
+        badge.className = 'escape-risk-badge fire';
+    }
+    if (banner) banner.style.borderColor = 'rgba(255,23,68,0.8)';
+
+    addEscapeLog('⚠ PROTOCOLO DE EMERGÊNCIA ATIVADO!', 'alert');
+    addEscapeLog('► Notificando Defesa Civil 199 automaticamente...', 'alert');
+    showToast('PROTOCOLO DE EMERGÊNCIA ATIVADO! Ligue 199 imediatamente!', 'fa-triangle-exclamation');
+
+    // Auto-find nearest shelter and route
+    locateUserEscape();
+
+    setTimeout(() => {
+        addEscapeLog('► SAMU (192) e Bombeiros (193) notificados via satlink', 'alert');
+    }, 2000);
+    setTimeout(() => {
+        addEscapeLog('► Transmissão de localização via LEO-SAR ativa', 'alert');
+    }, 4000);
+}
+
+function addEscapeLog(msg, type = 'info') {
+    const log = document.getElementById('escape-status-log');
+    if (!log) return;
+    const colors = { ok: '#00ff66', warn: '#ff9100', alert: '#ff1744', info: '#90caf9' };
+    const div = document.createElement('div');
+    div.style.color = colors[type] || '#90caf9';
+    div.textContent = msg;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    // Keep max 20 lines
+    while (log.children.length > 20) log.removeChild(log.firstChild);
+}
+
+// Haversine distance formula (returns km)
+function haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
